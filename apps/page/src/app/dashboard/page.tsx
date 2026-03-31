@@ -9,8 +9,8 @@ export default async function DashboardPage() {
     <>
       <Header />
       <div className="flex flex-1 flex-col items-center justify-center p-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Hello, {displayName}!</p>
+        <h1 className="text-2xl font-bold text-sds-rich-black">Dashboard</h1>
+        <p className="mt-2 text-sds-gray-400">Hello, {displayName}!</p>
       </div>
     </>
   );

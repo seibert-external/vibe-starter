@@ -7,12 +7,15 @@ WORKDIR /app
 
 # --- Dependencies ---
 FROM base AS deps
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY apps/page/package.json ./apps/page/package.json
 COPY packages/database/package.json ./packages/database/package.json
 COPY packages/eslint-config/package.json ./packages/eslint-config/package.json
 COPY packages/prettier-config/package.json ./packages/prettier-config/package.json
 COPY packages/typescript-config/package.json ./packages/typescript-config/package.json
+# NPM_TOKEN is needed to install @seibert/react-ui from the private npm scope.
+# Pass it as a build arg in Coolify (or `docker build --build-arg NPM_TOKEN=...`).
+ARG NPM_TOKEN
 # Skip postinstall scripts (prisma generate needs the schema which isn't copied yet)
 RUN pnpm install --frozen-lockfile --ignore-scripts
 

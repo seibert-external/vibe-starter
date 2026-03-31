@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { DashboardProviders } from "~/components/dashboard-providers";
 import { getServerAuthSession } from "~/server/auth";
 
 interface Props {
@@ -12,9 +11,5 @@ export default async function DashboardLayout({ children }: Props) {
     redirect("/login");
   }
 
-  return (
-    <DashboardProviders>
-      <div className="flex min-h-screen flex-col">{children}</div>
-    </DashboardProviders>
-  );
+  return <div className="flex min-h-screen flex-col">{children}</div>;
 }
