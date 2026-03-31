@@ -1,5 +1,6 @@
 import { Header } from "~/components/layout/header";
 import { getServerAuthSession } from "~/server/auth";
+import { DashboardContent } from "~/app/dashboard/_components/dashboard-content";
 
 export default async function DashboardPage() {
   const session = await getServerAuthSession();
@@ -8,10 +9,9 @@ export default async function DashboardPage() {
   return (
     <>
       <Header />
-      <div className="flex flex-1 flex-col items-center justify-center p-8">
-        <h1 className="text-2xl font-bold text-sds-rich-black">Dashboard</h1>
-        <p className="mt-2 text-sds-gray-400">Hello, {displayName}!</p>
-      </div>
+      <main className="flex-1 bg-sds-gray-50">
+        <DashboardContent displayName={displayName} />
+      </main>
     </>
   );
 }
