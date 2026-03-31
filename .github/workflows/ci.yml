@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        task:
+          - name: validate
+            command: pnpm turbo check
+          - name: build
+            command: pnpm turbo build
+          - name: dedupe
+            command: |
+              pnpm dedupe
+              if ! git diff --exit-code; then
+                echo "::error file=pnpm-lock.yaml::Lockfile changed after dedupe. Please run 'pnpm dedupe' and commit the changes.";
+                exit 1
+              fi
+    name: ${{ matrix.task.name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ${{ matrix.task.name }}
+        run: ${{ matrix.task.command }}
+        env:
+          SKIP_ENV_VALIDATION: true

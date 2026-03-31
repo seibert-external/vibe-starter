@@ -1,0 +1,56 @@
+name: Awaiting Response
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  nudge:
+    if: >-
+      github.event_name == 'issues'
+      && github.event.label.name == 'awaiting-response'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const creator = context.payload.issue.user.login;
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: [
+                `@${creator} We need a bit more information to move forward with this issue.`,
+                "",
+                "Please reply with the requested details. If there's no response within **7 days**, this issue will be closed automatically.",
+              ].join("\n"),
+            });
+
+  clear-on-reply:
+    if: >-
+      github.event_name == 'issue_comment'
+      && github.event.issue.state == 'open'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const comment = context.payload.comment;
+
+            if (comment.user.login !== issue.user.login) return;
+
+            const hasLabel = issue.labels.some(l => l.name === "awaiting-response");
+            if (!hasLabel) return;
+
+            await github.rest.issues.removeLabel({
+              ...context.repo,
+              issue_number: issue.number,
+              name: "awaiting-response",
+            });
+
+            core.info(`Removed "awaiting-response" from #${issue.number}`);

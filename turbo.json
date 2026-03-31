@@ -1,0 +1,56 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": [
+    "**/.env"
+  ],
+  "globalEnv": [
+    "POSTGRES_URL",
+    "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL",
+    "SEIBERT_CLIENT_ID",
+    "SEIBERT_CLIENT_SECRET",
+    "NODE_ENV",
+"SSR_ENCRYPTION_KEY",
+    "SKIP_ENV_VALIDATION"
+  ],
+  "tasks": {
+    "@repo/database#build": {
+      "outputs": [
+        "src/generated/**"
+      ]
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**"
+      ]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "lint": {
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "lint:fix": {},
+    "format": {},
+    "format:fix": {},
+    "fix": {
+      "dependsOn": [
+        "lint:fix",
+        "format:fix"
+      ]
+    },
+    "check": {
+      "dependsOn": [
+        "lint",
+        "format"
+      ]
+    }
+  }
+}

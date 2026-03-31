@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_URL: "postgresql://postgres:postgres@db:5432/app" # pragma: allowlist-secret local dev default
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}"
+      SEIBERT_CLIENT_ID: "${SEIBERT_CLIENT_ID}"
+      SEIBERT_CLIENT_SECRET: "${SEIBERT_CLIENT_SECRET}"
+      SSR_ENCRYPTION_KEY: "${SSR_ENCRYPTION_KEY}"
+
+volumes:
+  pgdata:
