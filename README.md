@@ -1,4 +1,6 @@
-# Seateao
+# Vibe Starter
+
+> ⚠️ **Work in Progress** — This will become the Vibe Coding Starter Project. Not ready for use yet.
 
 An opinionated starter template based on [Create T3 App](https://create.t3.gg/), with updated deps.
 
