@@ -28,13 +28,10 @@ on:
         description: "HEAD SHA of the PR branch (or push SHA)"
     secrets:
       COOLIFY_API_URL:
-        required: true
         description: "Coolify API base URL (e.g. https://coolify-dev.seibert.tools/api/v1)"
       COOLIFY_API_TOKEN:
-        required: true
         description: "Coolify API token"
       COOLIFY_APP_UUID:
-        required: true
         description: "UUID of the Coolify application"
 
 jobs:
