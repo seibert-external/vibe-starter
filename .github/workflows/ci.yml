@@ -38,6 +38,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}
