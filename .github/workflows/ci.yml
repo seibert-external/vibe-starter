@@ -9,6 +9,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-22.04
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     strategy:
       matrix:
         task:
@@ -38,8 +40,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run ${{ matrix.task.name }}
         run: ${{ matrix.task.command }}
