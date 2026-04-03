@@ -25,20 +25,20 @@ function ActivityFeed({
           key={item.id}
           className={cn(
             "flex items-start gap-3 px-1 py-3",
-            i < items.length - 1 && "border-b border-border",
+            i < items.length - 1 && "border-border border-b",
           )}
         >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sds-pine-green-600 text-xs font-semibold text-white">
+          <div className="bg-sds-pine-green-600 flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white">
             {item.avatar}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <p className="text-sm text-sds-rich-black">
+            <p className="text-sds-rich-black text-sm">
               <span className="font-semibold">{item.user}</span>{" "}
               <span className="text-sds-gray-500">{item.action}</span>{" "}
               <span className="font-medium">{item.target}</span>
             </p>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-sds-gray-400">{item.time}</span>
+              <span className="text-sds-gray-400 text-xs">{item.time}</span>
               {item.badge && (
                 <Badge variant={item.badge.variant}>{item.badge.label}</Badge>
               )}

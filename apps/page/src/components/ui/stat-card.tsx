@@ -92,7 +92,7 @@ function StatCard({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         {icon && (
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sds-gray-50 text-sds-pine-green-600">
+          <div className="bg-sds-gray-50 text-sds-pine-green-600 flex size-10 shrink-0 items-center justify-center rounded-lg">
             {icon}
           </div>
         )}

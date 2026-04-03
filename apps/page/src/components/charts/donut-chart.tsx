@@ -73,7 +73,7 @@ function DonutChart({
           y={center}
           textAnchor="middle"
           dominantBaseline="central"
-          className="rotate-90 fill-sds-rich-black text-2xl font-bold"
+          className="fill-sds-rich-black rotate-90 text-2xl font-bold"
           style={{ transformOrigin: "center" }}
         >
           {total}
@@ -82,13 +82,16 @@ function DonutChart({
       {/* Legend */}
       <div className="flex flex-col gap-2">
         {segments.map((seg, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div
+            key={i}
+            className="flex items-center gap-2"
+          >
             <div
               className="size-3 rounded-full"
               style={{ backgroundColor: seg.color }}
             />
-            <span className="text-sm text-sds-gray-500">{seg.label}</span>
-            <span className="ml-auto text-sm font-semibold text-sds-rich-black">
+            <span className="text-sds-gray-500 text-sm">{seg.label}</span>
+            <span className="text-sds-rich-black ml-auto text-sm font-semibold">
               {seg.value}
             </span>
           </div>

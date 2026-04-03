@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-sds-gray-50">
+      <main className="bg-sds-gray-50 flex-1">
         <DashboardContent displayName={displayName} />
       </main>
     </>

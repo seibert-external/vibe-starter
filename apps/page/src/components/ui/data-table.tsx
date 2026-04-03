@@ -30,12 +30,12 @@ function DataTable<T extends Record<string, unknown>>({
     <div className={cn("overflow-x-auto", className)}>
       <table className="w-full">
         <thead>
-          <tr className="border-b border-border">
+          <tr className="border-border border-b">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  "px-3 py-2.5 text-xs font-semibold text-sds-gray-500 uppercase tracking-wider",
+                  "text-sds-gray-500 px-3 py-2.5 text-xs font-semibold tracking-wider uppercase",
                   alignClass(col.align),
                 )}
               >
@@ -49,7 +49,7 @@ function DataTable<T extends Record<string, unknown>>({
             <tr
               key={i}
               className={cn(
-                "border-b border-border last:border-0",
+                "border-border border-b last:border-0",
                 "hover:bg-sds-gray-50/50 transition-colors",
               )}
             >
@@ -57,7 +57,7 @@ function DataTable<T extends Record<string, unknown>>({
                 <td
                   key={col.key}
                   className={cn(
-                    "px-3 py-3 text-sm text-sds-rich-black",
+                    "text-sds-rich-black px-3 py-3 text-sm",
                     alignClass(col.align),
                   )}
                 >

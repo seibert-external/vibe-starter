@@ -43,7 +43,9 @@ function AreaChart({
     y: padTop + chartH - ((d.value - min) / range) * chartH,
   }));
 
-  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${String(p.x)},${String(p.y)}`).join(" ");
+  const linePath = points
+    .map((p, i) => `${i === 0 ? "M" : "L"}${String(p.x)},${String(p.y)}`)
+    .join(" ");
   const areaPath = `${linePath} L${String(padLeft + chartW)},${String(padTop + chartH)} L${String(padLeft)},${String(padTop + chartH)} Z`;
 
   return (
@@ -53,9 +55,23 @@ function AreaChart({
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={fillColor} stopOpacity="0.2" />
-          <stop offset="100%" stopColor={fillColor} stopOpacity="0.02" />
+        <linearGradient
+          id="areaGrad"
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
+          <stop
+            offset="0%"
+            stopColor={fillColor}
+            stopOpacity="0.2"
+          />
+          <stop
+            offset="100%"
+            stopColor={fillColor}
+            stopOpacity="0.02"
+          />
         </linearGradient>
       </defs>
 
@@ -86,7 +102,10 @@ function AreaChart({
       })}
 
       {/* Area fill */}
-      <path d={areaPath} fill="url(#areaGrad)" />
+      <path
+        d={areaPath}
+        fill="url(#areaGrad)"
+      />
 
       {/* Line */}
       <path

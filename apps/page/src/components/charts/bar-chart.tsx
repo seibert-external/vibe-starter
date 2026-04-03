@@ -37,9 +37,7 @@ function BarChart({
   const max = Math.max(...allValues);
   const hasSecondary = data.some((d) => d.secondaryValue !== undefined);
 
-  const yTicks = Array.from({ length: 5 }, (_, i) =>
-    Math.round((max * i) / 4),
-  );
+  const yTicks = Array.from({ length: 5 }, (_, i) => Math.round((max * i) / 4));
 
   const barGroupWidth = chartW / data.length;
   const barWidth = hasSecondary ? barGroupWidth * 0.35 : barGroupWidth * 0.5;
@@ -80,7 +78,10 @@ function BarChart({
       {/* Bars */}
       {data.map((d, i) => {
         const groupX =
-          padLeft + i * barGroupWidth + (barGroupWidth - (hasSecondary ? barWidth * 2 + barGap : barWidth)) / 2;
+          padLeft +
+          i * barGroupWidth +
+          (barGroupWidth - (hasSecondary ? barWidth * 2 + barGap : barWidth)) /
+            2;
         const barH = (d.value / max) * chartH;
         const secBarH = d.secondaryValue
           ? (d.secondaryValue / max) * chartH

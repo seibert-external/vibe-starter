@@ -26,7 +26,10 @@ export default async function RootLayout({
     <html lang="en">
       <body className="min-h-screen">
         <TRPCReactProvider cloakedCookie={cloakedCookie}>
-          <LocaleProvider locale={await getLocale()} tz={await getTz()}>
+          <LocaleProvider
+            locale={await getLocale()}
+            tz={await getTz()}
+          >
             {children}
             <ReactQueryDevtools />
           </LocaleProvider>
