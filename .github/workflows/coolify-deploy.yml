@@ -49,6 +49,30 @@ jobs:
     runs-on: ubuntu-latest
     name: deploy
     steps:
+      - name: Verify Coolify API is reachable
+        env:
+          COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+        run: |
+          http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+            "${COOLIFY_API_URL}/version" \
+            -H "Authorization: Bearer ${COOLIFY_API_TOKEN}")
+
+          echo "Coolify API responded with HTTP ${http_code}"
+
+          if [ "$http_code" = "000" ]; then
+            echo "::error::Coolify API is not reachable (connection refused/timeout). Is the runner inside the network?"
+            exit 1
+          elif [ "$http_code" = "403" ]; then
+            echo "::error::Coolify API returned 403 Forbidden. The GitHub runner's IP is not allowed through the firewall."
+            exit 1
+          elif [ "$http_code" -ge 400 ]; then
+            echo "::error::Coolify API returned HTTP ${http_code}."
+            exit 1
+          fi
+
+          echo "✅ Coolify API is reachable"
+
       - name: Resolve deployment context
         id: ctx
         run: |
