@@ -24,7 +24,4 @@ jobs:
       pr_number: ${{ github.event.pull_request.number || 0 }}
       pr_action: ${{ github.event.action || '' }}
       pr_head_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-    secrets:
-      COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
-      COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
-      COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+    secrets: inherit
