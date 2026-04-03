@@ -1,38 +1,47 @@
 # Reusable Coolify deploy workflow.
-# Lives here for now — will move to a shared-workflows repo later.
+# Lives here for now — will move to seibert-external/workflows later.
 #
 # Consumer repos call this via:
 #   uses: ./.github/workflows/coolify-deploy.yml          (local)
-#   uses: org/shared-workflows/.github/workflows/coolify-deploy.yml@main  (shared)
+#   uses: seibert-external/workflows/.github/workflows/coolify-deploy.yml@main  (shared)
+#
+# Required org-level secrets (via secrets: inherit):
+#   COOLIFY_API_URL   — Coolify API base URL (e.g. https://coolify-dev.seibert.tools/api/v1)
+#   COOLIFY_API_TOKEN — Coolify API token
 
 name: Coolify Deploy
 
 on:
   workflow_call:
     inputs:
+      coolify_app_uuid:
+        required: true
+        type: string
+        description: "UUID of the Coolify application"
       event_name:
         required: true
         type: string
         description: "The triggering event (push or pull_request)"
       pr_number:
-        required: true
+        required: false
         type: number
+        default: 0
         description: "Pull request number (0 for push events)"
       pr_action:
-        required: true
+        required: false
         type: string
+        default: ""
         description: "Pull request action (opened, synchronize, reopened, closed)"
       pr_head_sha:
-        required: true
+        required: false
         type: string
+        default: ""
         description: "HEAD SHA of the PR branch (or push SHA)"
-    secrets:
-      COOLIFY_API_URL:
-        description: "Coolify API base URL (e.g. https://coolify-dev.seibert.tools/api/v1)"
-      COOLIFY_API_TOKEN:
-        description: "Coolify API token"
-      COOLIFY_APP_UUID:
-        description: "UUID of the Coolify application"
+      poll_timeout:
+        required: false
+        type: number
+        default: 300
+        description: "Deployment poll timeout in seconds"
 
 jobs:
   deploy:
@@ -56,11 +65,10 @@ jobs:
         env:
           COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
           COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
-          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+          COOLIFY_APP_UUID: ${{ inputs.coolify_app_uuid }}
         run: |
           pr="${{ steps.ctx.outputs.pr_number }}"
 
-          # Fetch app metadata from Coolify
           app=$(curl -sf "${COOLIFY_API_URL}/applications/${COOLIFY_APP_UUID}" \
             -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
             -H "Accept: application/json")
@@ -68,14 +76,11 @@ jobs:
           fqdn=$(echo "$app" | jq -r '.fqdn')
           template=$(echo "$app" | jq -r '.preview_url_template')
 
-          # Extract domain from fqdn (strip protocol)
+          # Strip protocol from fqdn
           domain=$(echo "$fqdn" | sed 's|^https\?://||')
 
-          # Build preview URL from template:
-          #   {{pr_id}}.{{domain}} → 42.myapp.coolify-dev.seibert.tools
+          # Build preview URL from template: {{pr_id}}.{{domain}}
           preview_host=$(echo "$template" | sed "s/{{pr_id}}/${pr}/g" | sed "s/{{domain}}/${domain}/g")
-
-          # Detect protocol from fqdn
           protocol=$(echo "$fqdn" | grep -oP '^https?' || echo "http")
           preview_url="${protocol}://${preview_host}"
 
@@ -87,7 +92,7 @@ jobs:
         env:
           COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
           COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
-          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+          COOLIFY_APP_UUID: ${{ inputs.coolify_app_uuid }}
         run: |
           target="${{ steps.ctx.outputs.target }}"
 
@@ -153,7 +158,6 @@ jobs:
         env:
           COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
           COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
-          POLL_TIMEOUT: ${{ vars.COOLIFY_POLL_TIMEOUT || '300' }}
         run: |
           deployment_uuid="${{ steps.trigger.outputs.deployment_uuid }}"
 
@@ -163,7 +167,7 @@ jobs:
             exit 0
           fi
 
-          timeout="${POLL_TIMEOUT}"
+          timeout="${{ inputs.poll_timeout }}"
           echo "Polling deployment ${deployment_uuid} (timeout: ${timeout}s)..."
           elapsed=0
 
