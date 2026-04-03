@@ -6,10 +6,19 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
 jobs:
   deploy:
     # TODO: update to your-org/shared-workflows/.github/workflows/coolify-deploy.yml@main once extracted
     uses: ./.github/workflows/coolify-deploy.yml
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
     with:
       event_name: ${{ github.event_name }}
       pr_number: ${{ github.event.pull_request.number || 0 }}

@@ -37,11 +37,6 @@ on:
         required: true
         description: "UUID of the Coolify application"
 
-permissions:
-  contents: read
-  pull-requests: write
-  deployments: write
-
 jobs:
   deploy:
     if: inputs.event_name == 'push' || (inputs.event_name == 'pull_request' && inputs.pr_action != 'closed')
