@@ -1,18 +1,16 @@
-# Next.js on Coolify — Starter Template
+# Seateao
 
-An opinionated starter template based on [Create T3 App](https://create.t3.gg/), configured for self-hosted deployment on [Coolify](https://coolify.io/) with per-PR preview environments and isolated databases.
+An opinionated starter template based on [Create T3 App](https://create.t3.gg/), with updated deps.
 
-## What's Included
+## What's Different
 
-- **Coolify deployment** with Dockerfile build pack
-- **Per-PR preview databases** — each pull request gets its own PostgreSQL database, auto-created on deploy, auto-cleaned on the next deploy after PR close
-- **GitHub Actions CI/CD** — triggers Coolify deploys, polls for status, comments preview URLs on PRs
 - **Prisma 7** with the new `pg` adapter
 - **React Query 5** (TanStack Query, new queryOptions API)
-- **Seibert OIDC** pre-configured with domain restriction
+- **Google OAuth** pre-configured with domain restriction
 - **shadcn/ui** components with Base UI/Radix primitives
 - **TailwindCSS 4** with PostCSS
 - **Turbo monorepo** structure with shared configs
+- **CI/CD pipelines** — GitHub Actions for CI, Coolify for deployments with preview environments
 
 ## Stack
 
@@ -21,7 +19,6 @@ An opinionated starter template based on [Create T3 App](https://create.t3.gg/),
 - PostgreSQL + Prisma
 - NextAuth.js
 - TypeScript 5.9
-- Coolify (self-hosted PaaS)
 
 ## Getting Started
 
@@ -31,7 +28,7 @@ pnpm install
 
 # Set up environment
 cp .env.example .env
-# Fill in POSTGRES_URL, SEIBERT_CLIENT_ID, SEIBERT_CLIENT_SECRET, etc.
+# Fill in POSTGRES_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, etc.
 
 # Run database migrations
 pnpm db:migrate:dev
@@ -52,106 +49,55 @@ packages/
   prettier-config/   # Shared Prettier config
   typescript-config/ # Shared TypeScript config
 .github/workflows/   # CI/CD pipelines
-entrypoint.sh        # Docker entrypoint (preview DB creation, migrations, cleanup)
 ```
-
-## Coolify Setup
-
-### 1. Create Resources
-
-In your Coolify project, create:
-
-- **Application** — Dockerfile build pack, pointing at your GitHub repo, branch `main`
-- **PostgreSQL database** — used by both production and preview deployments
-
-Both must be on the same Coolify network (default: `coolify`) so the app can reach the database via internal hostname.
-
-### 2. Configure the Application
-
-| Setting | Value |
-|---|---|
-| Build Pack | Dockerfile |
-| Auto Deploy | Off (GitHub Actions handles this) |
-| Preview Deployments | On |
-| Preview URL Template | `{{pr_id}}.{{domain}}` (default) |
-
-### 3. Set Environment Variables
-
-**Production variables** (Preview = off):
-
-| Key | Value |
-|---|---|
-| `POSTGRES_URL` | `postgresql://user:pass@<db-internal-hostname>:5432/postgres` | <!-- pragma: allowlist-secret placeholder, not a real password -->
-| `NEXTAUTH_URL` | Your production URL |
-| `NEXTAUTH_SECRET` | Random secret |
-| `SEIBERT_CLIENT_ID` | Seibert OIDC client ID |
-| `SEIBERT_CLIENT_SECRET` | Seibert OIDC client secret |
-| `SSR_ENCRYPTION_KEY` | Next.js encryption key |
-
-**Preview variables** (Preview = on):
-
-| Key | Value |
-|---|---|
-| `POSTGRES_ADMIN_URL` | `postgresql://user:pass@<db-internal-hostname>:5432/postgres` (same host, `postgres` DB) | <!-- pragma: allowlist-secret placeholder, not a real password -->
-| `NEXTAUTH_SECRET` | Same as production |
-| `SEIBERT_CLIENT_ID` | Same as production |
-| `SEIBERT_CLIENT_SECRET` | Same as production |
-| `SSR_ENCRYPTION_KEY` | Same as production |
-
-Do **not** set `POSTGRES_URL` or `NEXTAUTH_URL` for preview — the entrypoint derives them automatically:
-- `POSTGRES_URL` is constructed from `POSTGRES_ADMIN_URL` with a per-branch database name
-- `NEXTAUTH_URL` is auto-set from Coolify's `COOLIFY_URL`
-
-### 4. GitHub Secrets
-
-Go to your repo **Settings > Secrets and variables > Actions** and add:
-
-| Secret | Description |
-|---|---|
-| `COOLIFY_API_TOKEN` | Coolify API token (Settings > API Tokens) |
-| `COOLIFY_APP_UUID` | Your application's UUID (visible in the Coolify URL) |
-
-### 5. GitHub App Integration
-
-Coolify's GitHub App must be connected to your repo for preview deployments to work. The GitHub App webhook registers new PRs with Coolify. Without it, the `deploy?pr=N` API call will fail with "Pull request not found."
 
 ## CI/CD
 
-### Deploy Flow
-
-```
-Push to main ──────→ GitHub Action triggers Coolify ──→ Build + migrate ──→ Production live
-Open PR ───────────→ Coolify webhook registers PR
-                     GitHub Action triggers deploy ───→ Build + create preview DB + migrate ──→ Preview live
-                     PR comment: ⏳ Deploying → ✅ Live (with URL)
-Close PR ──────────→ Coolify stops preview container
-                     Next preview deploy cleans up orphaned databases
-```
-
-### How Preview Databases Work
-
-The `entrypoint.sh` script runs before the app starts:
-
-1. If `POSTGRES_ADMIN_URL` is set (preview mode):
-   - Derives a database name from `COOLIFY_BRANCH` (e.g., `preview_pull_5_head_pr_5_coolify`)
-   - Creates the database if it doesn't exist
-   - Overrides `POSTGRES_URL` to point at the new database
-   - Drops any `preview_*` databases with no active connections (orphans from closed PRs)
-2. Runs `prisma migrate deploy`
-3. Starts the Next.js server
-
-Production deployments skip all preview logic (no `POSTGRES_ADMIN_URL` set).
+Deployments are built and deployed via [Coolify](https://coolify.io/) (self-hosted). The GitHub Actions pipeline triggers Coolify's API — Coolify handles Docker builds, container orchestration, and routing. Preview environments get isolated databases per branch.
 
 ### Workflows
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| **CI** (`ci.yml`) | Push to `main`, PRs | Lint, format, build, lockfile check |
-| **Deploy** (`deploy.yml`) | Push to `main`, PRs | Trigger Coolify deploy, poll status, comment on PR |
-| **Claude Code** (`claude.yml`) | `@claude` mentions | AI-assisted PR review |
-| **Renovate Approve** | Renovate PRs | Auto-approves dependency updates |
-| **Close Stale Issues/PRs** | Hourly | Closes inactive issues/PRs after 7 days |
+| **CI** (`ci.yml`) | Push to `main`, PRs | Lint/format validation, build check, lockfile dedupe check |
+| **Deploy** (`deploy.yml`) | Push to `main`, PRs | Triggers Coolify deployment, polls status, comments preview URL |
+| **Claude Code** (`claude.yml`) | `@claude` mentions, PR open | AI-assisted PR review and issue responses |
+| **Renovate Approve** (`renovate-approve.yml`) | PRs from Renovate | Auto-approves dependency update PRs |
+| **Close Stale Issues** (`close-stale-issues.yml`) | Hourly schedule | Closes issues labeled `awaiting-response` after 7 days |
+| **Close Stale PRs** (`close-stale-prs.yml`) | Hourly schedule | Closes inactive non-Renovate PRs after 7 days |
+| **Awaiting Response** (`awaiting-response.yml`) | Issue label/comment | Nudges on label add, clears label when author replies |
 
-## Build from Here
+### Deploy Flow
 
-This is an empty starting point. The infrastructure is ready — add your features.
+```
+Push to main ──→ Trigger Coolify deploy ──→ Docker build ──→ Prisma migrate ──→ Production
+Open PR ────────→ Trigger Coolify preview ──→ Docker build ──→ Create branch DB ──→ Prisma migrate ──→ Preview
+Close PR ───────→ Cleanup preview database (TODO)
+```
+
+PRs get a bot comment with the preview URL (dynamically resolved from the Coolify API), updated on each push. The preview URL follows the pattern configured in Coolify's `preview_url_template`.
+
+The Docker entrypoint (`entrypoint.sh`) handles preview database isolation: when `POSTGRES_ADMIN_URL` is set, it creates a branch-specific database (`starter_<branch_slug>`) and runs migrations against it.
+
+### Setup
+
+#### 1. Coolify
+
+Create an application in Coolify pointing to your GitHub repo. Coolify handles Docker builds using the repo's `Dockerfile`. Make sure:
+
+- **Build pack** is set to `dockerfile`
+- **Preview deployments** are enabled with desired URL template (default: `{{pr_id}}.{{domain}}`)
+- The app has `POSTGRES_ADMIN_URL` set as an environment variable (for preview DB creation)
+
+#### 2. GitHub Secrets
+
+Go to **Settings → Secrets and variables → Actions** and add these secrets:
+
+| Secret | Description |
+|---|---|
+| `COOLIFY_API_URL` | Coolify API base URL (e.g. `https://coolify-dev.seibert.tools/api/v1`) |
+| `COOLIFY_API_TOKEN` | Coolify API token (create under Settings → API Tokens) |
+| `COOLIFY_APP_UUID` | UUID of the Coolify application (visible in app URL or API) |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Anthropic Claude Code OAuth token (for AI workflows) |
+
+The pipeline is **fully portable** — no hardcoded URLs. The preview URL is dynamically resolved from the Coolify API at deploy time using the app's `fqdn` and `preview_url_template`.

@@ -1,0 +1,258 @@
+# Reusable Coolify deploy workflow.
+# Lives here for now — will move to a shared-workflows repo later.
+#
+# Consumer repos call this via:
+#   uses: ./.github/workflows/coolify-deploy.yml          (local)
+#   uses: org/shared-workflows/.github/workflows/coolify-deploy.yml@main  (shared)
+
+name: Coolify Deploy
+
+on:
+  workflow_call:
+    inputs:
+      event_name:
+        required: true
+        type: string
+        description: "The triggering event (push or pull_request)"
+      pr_number:
+        required: true
+        type: number
+        description: "Pull request number (0 for push events)"
+      pr_action:
+        required: true
+        type: string
+        description: "Pull request action (opened, synchronize, reopened, closed)"
+      pr_head_sha:
+        required: true
+        type: string
+        description: "HEAD SHA of the PR branch (or push SHA)"
+    secrets:
+      COOLIFY_API_URL:
+        required: true
+        description: "Coolify API base URL (e.g. https://coolify-dev.seibert.tools/api/v1)"
+      COOLIFY_API_TOKEN:
+        required: true
+        description: "Coolify API token"
+      COOLIFY_APP_UUID:
+        required: true
+        description: "UUID of the Coolify application"
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+jobs:
+  deploy:
+    if: inputs.event_name == 'push' || (inputs.event_name == 'pull_request' && inputs.pr_action != 'closed')
+    runs-on: ubuntu-latest
+    name: deploy
+    steps:
+      - name: Resolve deployment context
+        id: ctx
+        run: |
+          if [ "${{ inputs.event_name }}" = "push" ]; then
+            echo "target=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "target=preview" >> "$GITHUB_OUTPUT"
+            echo "pr_number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve preview URL from Coolify API
+        if: steps.ctx.outputs.target == 'preview'
+        id: url
+        env:
+          COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+        run: |
+          pr="${{ steps.ctx.outputs.pr_number }}"
+
+          # Fetch app metadata from Coolify
+          app=$(curl -sf "${COOLIFY_API_URL}/applications/${COOLIFY_APP_UUID}" \
+            -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
+            -H "Accept: application/json")
+
+          fqdn=$(echo "$app" | jq -r '.fqdn')
+          template=$(echo "$app" | jq -r '.preview_url_template')
+
+          # Extract domain from fqdn (strip protocol)
+          domain=$(echo "$fqdn" | sed 's|^https\?://||')
+
+          # Build preview URL from template:
+          #   {{pr_id}}.{{domain}} → 42.myapp.coolify-dev.seibert.tools
+          preview_host=$(echo "$template" | sed "s/{{pr_id}}/${pr}/g" | sed "s/{{domain}}/${domain}/g")
+
+          # Detect protocol from fqdn
+          protocol=$(echo "$fqdn" | grep -oP '^https?' || echo "http")
+          preview_url="${protocol}://${preview_host}"
+
+          echo "preview_url=${preview_url}" >> "$GITHUB_OUTPUT"
+          echo "Resolved preview URL: ${preview_url}"
+
+      - name: Trigger Coolify deployment
+        id: trigger
+        env:
+          COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+        run: |
+          target="${{ steps.ctx.outputs.target }}"
+
+          if [ "$target" = "preview" ]; then
+            pr="${{ steps.ctx.outputs.pr_number }}"
+            echo "Triggering preview deployment for PR #${pr}..."
+            response=$(curl -sf "${COOLIFY_API_URL}/deploy?uuid=${COOLIFY_APP_UUID}&pr=${pr}" \
+              -H "Authorization: Bearer ${COOLIFY_API_TOKEN}")
+          else
+            echo "Triggering production deployment..."
+            response=$(curl -sf "${COOLIFY_API_URL}/deploy?uuid=${COOLIFY_APP_UUID}&force=true" \
+              -H "Authorization: Bearer ${COOLIFY_API_TOKEN}")
+          fi
+
+          echo "Response: $response"
+          deployment_uuid=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
+          echo "deployment_uuid=${deployment_uuid}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment deploying status
+        if: steps.ctx.outputs.target == 'preview'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.ctx.outputs.pr_number }};
+            const previewUrl = '${{ steps.url.outputs.preview_url }}';
+            const sha = '${{ inputs.pr_head_sha }}'.slice(0, 7);
+            const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+            const marker = `<!-- coolify:preview -->`;
+
+            const body = [
+              marker,
+              `⏳ **Deploying** preview...`,
+              `🔗 ${previewUrl}`,
+              '',
+              `<sub>${sha} · ${now}</sub>`,
+            ].join('\n');
+
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.data.find(c => c.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+      - name: Poll Coolify deployment status
+        id: poll
+        env:
+          COOLIFY_API_URL: ${{ secrets.COOLIFY_API_URL }}
+          COOLIFY_API_TOKEN: ${{ secrets.COOLIFY_API_TOKEN }}
+          POLL_TIMEOUT: ${{ vars.COOLIFY_POLL_TIMEOUT || '300' }}
+        run: |
+          deployment_uuid="${{ steps.trigger.outputs.deployment_uuid }}"
+
+          if [ -z "$deployment_uuid" ]; then
+            echo "No deployment UUID, skipping poll"
+            echo "status=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          timeout="${POLL_TIMEOUT}"
+          echo "Polling deployment ${deployment_uuid} (timeout: ${timeout}s)..."
+          elapsed=0
+
+          while [ $elapsed -lt $timeout ]; do
+            status=$(curl -sf "${COOLIFY_API_URL}/deployments/${deployment_uuid}" \
+              -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
+              | jq -r '.status // "unknown"')
+
+            echo "[${elapsed}s] Status: ${status}"
+
+            case "$status" in
+              finished)
+                echo "status=success" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+              failed|cancelled|error)
+                echo "status=failure" >> "$GITHUB_OUTPUT"
+                exit 1
+                ;;
+            esac
+
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+
+          echo "Timed out after ${timeout}s"
+          echo "status=timeout" >> "$GITHUB_OUTPUT"
+          exit 1
+        timeout-minutes: 6
+
+      - name: Comment final status
+        if: always() && steps.ctx.outputs.target == 'preview'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.ctx.outputs.pr_number }};
+            const previewUrl = '${{ steps.url.outputs.preview_url }}';
+            const sha = '${{ inputs.pr_head_sha }}'.slice(0, 7);
+            const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+            const marker = `<!-- coolify:preview -->`;
+            const status = '${{ steps.poll.outputs.status }}';
+
+            let icon, label;
+            if (status === 'success') {
+              icon = '✅';
+              label = 'Live';
+            } else if (status === 'timeout') {
+              icon = '⏰';
+              label = 'Timed out';
+            } else {
+              icon = '❌';
+              label = 'Failed';
+            }
+
+            const body = [
+              marker,
+              `${icon} **${label}:** ${previewUrl}`,
+              status === 'success' ? '🗄️ Isolated preview database (branch-specific)' : '',
+              '',
+              `<sub>${sha} · ${now}</sub>`,
+            ].filter(Boolean).join('\n');
+
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.data.find(c => c.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
