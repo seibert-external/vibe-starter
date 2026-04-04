@@ -8,4 +8,7 @@ on:
 jobs:
   ci:
     uses: seibert-external/vibe-ci/.github/workflows/ci.yml@main
+    permissions:
+      contents: read
+      checks: write
     secrets: inherit
