@@ -63,6 +63,16 @@ packages/
 
 **Env vars**: Validated at build time via `src/env.js`. New vars must be added to both the schema and `runtimeEnv`.
 
+### Testing (TDD)
+
+**Always use Test-Driven Development when building features.** This applies to every new tRPC procedure, service function, or business logic — no exceptions.
+
+- Use the `/tdd` command for the full TDD workflow
+- **Framework**: Vitest (`pnpm test`, `pnpm test:watch`, `pnpm test:coverage`)
+- **Pattern**: Vertical slices — ONE test, ONE implementation, repeat (never write all tests first)
+- **Location**: Place tests next to the code they test as `*.test.ts`
+- Tests must verify behavior through public interfaces, not implementation details
+
 ### Stack
 
 - **Framework**: Next.js 16, React 19

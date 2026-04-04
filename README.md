@@ -68,6 +68,16 @@ Open PR ────────→ GitHub Actions ──→ Coolify API ──�
 - **Preview** gets its own database per PR (automatically via `entrypoint.sh`)
 - Shared workflow lives in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
 
+## Testing
+
+This project uses **Test-Driven Development** with Vitest. Use the `/tdd` command in Claude Code for the full workflow.
+
+```bash
+pnpm test             # Run all tests
+pnpm test:watch       # Watch mode (re-run on changes)
+pnpm test:coverage    # Run with coverage report
+```
+
 ## Useful Commands
 
 ```bash
@@ -75,6 +85,7 @@ pnpm dev              # Start dev server
 pnpm build            # Build everything
 pnpm check            # Run CI locally (lint + format)
 pnpm fix              # Auto-fix (lint + format)
+pnpm test             # Run all tests
 pnpm db:migrate:dev   # Create new migration
 pnpm db:studio        # Prisma Studio (DB GUI)
 pnpm types            # TypeScript check
