@@ -11,6 +11,9 @@
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "types": "tsc --noEmit"
   },
   "dependencies": {
@@ -45,13 +48,15 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.2",
     "eslint": "^10.0.2",
     "postcss": "^8.5.8",
     "postcss-simple-vars": "^7.0.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
   },
   "ct3aMetadata": {
     "initVersion": "7.24.2"

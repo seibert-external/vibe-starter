@@ -16,6 +16,8 @@ jobs:
         task:
           - name: validate
             command: pnpm turbo check
+          - name: test
+            command: pnpm turbo test
           - name: build
             command: pnpm turbo build
           - name: dedupe

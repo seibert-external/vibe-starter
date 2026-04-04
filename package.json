@@ -14,6 +14,9 @@
     "format:fix": "turbo format:fix",
     "fix": "dotenvx run -- turbo fix",
     "check": "dotenvx run -- turbo check",
+    "test": "dotenvx run -- turbo test",
+    "test:watch": "dotenvx run -- turbo test:watch",
+    "test:coverage": "dotenvx run -- turbo test:coverage",
     "db:migrate:dev": "dotenvx run -- pnpm --filter @repo/database migrate:dev",
     "db:migrate:deploy": "dotenvx run -- pnpm --filter @repo/database migrate:deploy",
     "db:studio": "dotenvx run -- pnpm --filter @repo/database studio"
