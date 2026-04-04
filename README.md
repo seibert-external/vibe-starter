@@ -1,81 +1,81 @@
 # Vibe Starter
 
-> ⚠️ **Work in Progress** — Noch nicht produktionsreif.
+> ⚠️ **Work in Progress** — Not production-ready yet.
 
-Starter-Template für Web-Applikationen bei Seibert. Forke dieses Repo als Ausgangspunkt für neue Projekte.
+Starter template for web applications at Seibert. This is a **GitHub template repo** — click **"Use this template"** to create a new project from it.
 
-## Wie nutze ich das?
+## How do I use this?
 
-1. **Repo forken** — Erstelle eine Kopie in `seibert-external` für dein Projekt
-2. **Coolify einrichten** — Projekt + Datenbank + App auf Coolify anlegen
-3. **Loslegen** — Baue deine App, CI/CD läuft automatisch
+1. **Create from template** — Click "Use this template" on GitHub to create a new repo in `seibert-external`
+2. **Set up Coolify** — Create a project + database + app on Coolify
+3. **Start building** — Build your app, CI/CD runs automatically
 
-> 🤖 Du brauchst das nicht alleine machen. Öffne das Repo in Claude Code, Cursor oder pi und sag: *"Ich will ein neues Projekt aufsetzen."* Der AI-Agent kennt die Anleitung in [`docs/setup-new-project.md`](docs/setup-new-project.md) und führt dich durch.
+> 🤖 You don't have to do this alone. Open the repo in Claude Code, Cursor, or pi and say: *"I want to set up a new project."* The AI agent knows the guide in [`docs/setup-new-project.md`](docs/setup-new-project.md) and will walk you through it.
 
-### Voraussetzungen
+### Prerequisites
 
-- **Coolify-Account** — Bei der IT anfragen ([Anwenderdoku](https://seibertgroup.atlassian.net/wiki/spaces/IT/pages/5919309870))
-- **Coolify API Token** — Unter https://coolify-dev.seibert.tools/security/api-tokens erstellen
-- **Seibert-VPN** — Coolify ist nur intern erreichbar
+- **Coolify account** — Request from IT ([User docs](https://seibertgroup.atlassian.net/wiki/spaces/IT/pages/5919309870))
+- **Coolify API token** — Create at https://coolify-dev.seibert.tools/security/api-tokens
+- **Seibert VPN** — Coolify is only accessible internally
 - **Node.js ≥ 22.18**, **pnpm 10.15**
 
 ## Tech Stack
 
-| Was | Womit |
+| What | With |
 |---|---|
 | Framework | Next.js 16, React 19 |
 | API | tRPC 11 + React Query |
-| Datenbank | PostgreSQL + Prisma 7 |
-| Auth | NextAuth.js mit Seibert OIDC |
+| Database | PostgreSQL + Prisma 7 |
+| Auth | NextAuth.js with Seibert OIDC |
 | Styling | TailwindCSS 4, @seibert/react-ui |
 | CI/CD | GitHub Actions → Coolify |
 | Monorepo | Turbo + pnpm Workspaces |
 
-## Lokale Entwicklung
+## Local Development
 
 ```bash
 pnpm install
-cp .env.example .env    # Env-Vars ausfüllen
-pnpm db:migrate:dev     # Datenbank-Migrationen
+cp .env.example .env    # Fill in env vars
+pnpm db:migrate:dev     # Run database migrations
 pnpm dev                # http://localhost:3001
 ```
 
-## Projektstruktur
+## Project Structure
 
 ```
 apps/page/              # Next.js App
 packages/
   database/             # Prisma Schema + Client
-  eslint-config/        # Geteilte ESLint-Regeln
-  prettier-config/      # Geteilte Prettier-Config
-  typescript-config/    # Geteilte TypeScript-Config
+  eslint-config/        # Shared ESLint rules
+  prettier-config/      # Shared Prettier config
+  typescript-config/    # Shared TypeScript config
 docs/
-  setup-new-project.md  # Anleitung: Neues Projekt aufsetzen
+  setup-new-project.md  # Guide: Setting up a new project
 .github/workflows/
-  ci.yml                # Lint, Build, Dedupe-Check
-  deploy.yml            # Coolify Deploy (nutzt seibert-external/vibe-ci)
+  ci.yml                # Lint, Build, Dedupe check
+  deploy.yml            # Coolify deploy (uses seibert-external/vibe-ci)
 ```
 
 ## CI/CD
 
 ```
-Push auf main ──→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Production
-PR öffnen ──────→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Preview (eigene DB)
+Push to main ──→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Production
+Open PR ────────→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Preview (own DB)
 ```
 
-- **CI** prüft Lint, Formatting, Build bei jedem Push/PR
-- **Deploy** triggert Coolify — Coolify baut das Docker Image und deployed
-- **Preview** bekommt pro PR eine eigene Datenbank (automatisch via `entrypoint.sh`)
-- Shared Workflow liegt in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
+- **CI** checks lint, formatting, build on every push/PR
+- **Deploy** triggers Coolify — Coolify builds the Docker image and deploys
+- **Preview** gets its own database per PR (automatically via `entrypoint.sh`)
+- Shared workflow lives in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
 
-## Nützliche Befehle
+## Useful Commands
 
 ```bash
-pnpm dev              # Dev-Server starten
-pnpm build            # Alles bauen
-pnpm check            # CI lokal prüfen (Lint + Format)
-pnpm fix              # Auto-Fix (Lint + Format)
-pnpm db:migrate:dev   # Neue Migration erstellen
-pnpm db:studio        # Prisma Studio (DB-GUI)
-pnpm types            # TypeScript prüfen
+pnpm dev              # Start dev server
+pnpm build            # Build everything
+pnpm check            # Run CI locally (lint + format)
+pnpm fix              # Auto-fix (lint + format)
+pnpm db:migrate:dev   # Create new migration
+pnpm db:studio        # Prisma Studio (DB GUI)
+pnpm types            # TypeScript check
 ```
