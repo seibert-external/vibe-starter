@@ -103,3 +103,4 @@ Go to **Settings → Secrets and variables → Actions** and add these secrets:
 | `CLAUDE_CODE_OAUTH_TOKEN` | Anthropic Claude Code OAuth token (for AI workflows) |
 
 The pipeline is **fully portable** — no hardcoded URLs. The preview URL is dynamically resolved from the Coolify API at deploy time using the app's `fqdn` and `preview_url_template`.
+
