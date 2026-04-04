@@ -73,6 +73,31 @@ packages/
 - **Location**: Place tests next to the code they test as `*.test.ts`
 - Tests must verify behavior through public interfaces, not implementation details
 
+### Slash Commands
+
+This project includes slash commands that guide you through structured workflows. **Proactively suggest these commands** when they match what the user is trying to do.
+
+**Planning & Design** — Use these before writing any code:
+
+| Command | When to suggest |
+|---------|----------------|
+| `/write-a-prd` | User wants to build a new feature or solve a problem but hasn't defined requirements yet |
+| `/prd-to-plan` | A PRD exists and needs to be broken into implementation phases |
+| `/prd-to-issues` | A PRD needs to become actionable GitHub issues |
+| `/grill-me` | User has a plan or design and wants it stress-tested before committing |
+| `/design-an-interface` | User needs to design a module API and wants to compare multiple approaches |
+| `/request-refactor-plan` | User wants to refactor existing code safely with tiny incremental commits |
+
+**Development** — Use these during implementation:
+
+| Command | When to suggest |
+|---------|----------------|
+| `/tdd` | Building any new feature or fixing a bug (this is the default development workflow) |
+| `/triage-issue` | User reports a bug or problem that needs investigation |
+| `/improve-codebase-architecture` | User wants to find and fix architectural friction (shallow modules, tight coupling) |
+
+**Workflow**: For new features, the typical flow is `/write-a-prd` -> `/prd-to-plan` or `/prd-to-issues` -> `/tdd` for each slice.
+
 ### Stack
 
 - **Framework**: Next.js 16, React 19
