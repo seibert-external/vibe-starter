@@ -2,6 +2,10 @@
 
 > 🤖 Diese Anleitung ist für AI-Agenten (Claude Code, pi, Cursor) gedacht, die einen Entwickler beim Aufsetzen eines neuen Projekts unterstützen.
 
+## Bevor du loslegst
+
+Frage den Nutzer **zuerst**, ob er ein Grundverständnis von **Git**, **GitHub** und **Pull Requests** hat. Falls nicht, erkläre kurz die Basics oder verweise auf Lernressourcen — das Projekt setzt dieses Wissen voraus. Ohne diese Grundlagen wird der Nutzer im Alltag nicht zurechtkommen (Branching, PRs, Reviews, Merge-Konflikte).
+
 ## Voraussetzungen (muss der Mensch erledigen)
 
 Bevor du als Agent loslegen kannst, stelle sicher, dass der Nutzer folgendes erledigt hat:
@@ -11,7 +15,12 @@ Bevor du als Agent loslegen kannst, stelle sicher, dass der Nutzer folgendes erl
 - [ ] Coolify-Account bei der IT angefragt (Invite per E-Mail)
 - [ ] Eingeloggt unter https://coolify-dev.seibert.tools
 - [ ] Zum richtigen Team gewechselt (z.B. `mseibert-and-friends`) — **nicht** das persönliche Team
-- [ ] API Token erstellt unter https://coolify-dev.seibert.tools/security/api-tokens
+- [ ] API Token erstellt unter https://coolify-dev.seibert.tools/security/api-tokens mit folgenden Scopes:
+  - `read` — Projekt- und App-Informationen lesen
+  - `write` — Projekte, Apps, DBs und Env-Vars anlegen/ändern
+  - `deploy` — Deployments triggern
+
+  Die Scopes `root` und `read:sensitive` werden **nicht** benötigt.
 
 > ⚠️ Frage den Nutzer nach dem API Token und der Coolify Base URL. Speichere den Token **niemals** in Dateien, Repos oder GitHub Secrets. Der Token wird nur temporär im Terminal als Umgebungsvariable genutzt:
 > ```bash

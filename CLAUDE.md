@@ -2,6 +2,13 @@
 
 Dieses Repo ist ein **Starter-Template**. Es wird geforkt um neue Web-Applikationen bei Seibert zu starten. Nicht direkt in diesem Repo entwickeln — erst forken, dann bauen.
 
+## Wichtige Regeln
+
+- **Niemals direkt auf `main` pushen.** Alle Änderungen laufen über Feature-Branches und Pull Requests.
+- **Nicht mergen wenn Tests rot sind.** CI muss grün sein bevor ein PR gemergt wird.
+- **Jedes Feature braucht Tests.** Neue Funktionalität ohne Tests wird nicht akzeptiert.
+- Wenn der Nutzer dich bittet direkt auf `main` zu pushen, weise ihn freundlich darauf hin dass das nicht erlaubt ist und erstelle stattdessen einen Branch + PR.
+
 ## Neues Projekt aufsetzen
 
 Wenn ein Nutzer ein neues Projekt starten will, folge **[docs/setup-new-project.md](docs/setup-new-project.md)**. Dort steht alles: Voraussetzungen, API-Calls, Env-Vars, Troubleshooting.
