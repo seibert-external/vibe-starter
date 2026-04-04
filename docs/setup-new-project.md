@@ -134,7 +134,7 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
   -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "preview_url_template": "{{pr_id}}.{{domain}}"
+    "preview_url_template": "{{pr_id}}-{{domain}}"
   }'
 ```
 
