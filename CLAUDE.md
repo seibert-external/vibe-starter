@@ -1,33 +1,33 @@
 # CLAUDE.md
 
-Dieses Repo ist ein **Starter-Template**. Es wird geforkt um neue Web-Applikationen bei Seibert zu starten. Nicht direkt in diesem Repo entwickeln — erst forken, dann bauen.
+This repo is a **starter template**. It gets forked to start new web applications at Seibert. Don't develop directly in this repo — fork first, then build.
 
-## Wichtige Regeln
+## Important Rules
 
-- **Niemals direkt auf `main` pushen.** Alle Änderungen laufen über Feature-Branches und Pull Requests.
-- **Nicht mergen wenn Tests rot sind.** CI muss grün sein bevor ein PR gemergt wird.
-- **Jedes Feature braucht Tests.** Neue Funktionalität ohne Tests wird nicht akzeptiert.
-- Wenn der Nutzer dich bittet direkt auf `main` zu pushen, weise ihn freundlich darauf hin dass das nicht erlaubt ist und erstelle stattdessen einen Branch + PR.
+- **Never push directly to `main`.** All changes go through feature branches and pull requests.
+- **Don't merge when tests are red.** CI must be green before a PR gets merged.
+- **Every feature needs tests.** New functionality without tests will not be accepted.
+- If the user asks you to push directly to `main`, kindly point out that this is not allowed and create a branch + PR instead.
 
-## Neues Projekt aufsetzen
+## Setting Up a New Project
 
-Wenn ein Nutzer ein neues Projekt starten will, folge **[docs/setup-new-project.md](docs/setup-new-project.md)**. Dort steht alles: Voraussetzungen, API-Calls, Env-Vars, Troubleshooting.
+If a user wants to start a new project, follow **[docs/setup-new-project.md](docs/setup-new-project.md)**. Everything is documented there: prerequisites, API calls, env vars, troubleshooting.
 
-Kurzversion: Der Nutzer braucht vorab einen **Coolify API Token** und ein **Repo in `seibert-external`** (kopiert von diesem Starter). Dann legst du als Agent via Coolify API ein Projekt, eine PostgreSQL-DB und eine App an.
+Short version: The user needs a **Coolify API Token** and a **repo in `seibert-external`** (copied from this starter) beforehand. Then you as an agent create a project, a PostgreSQL DB, and an app via the Coolify API.
 
 ## Commands
 
 ```bash
-pnpm dev              # Dev-Server (Port 3001)
-pnpm build            # Alles bauen
-pnpm check            # CI lokal (Lint + Format)
-pnpm fix              # Auto-Fix (Lint + Format)
-pnpm db:migrate:dev   # Migration erstellen/anwenden
+pnpm dev              # Dev server (port 3001)
+pnpm build            # Build everything
+pnpm check            # Run CI locally (lint + format)
+pnpm fix              # Auto-fix (lint + format)
+pnpm db:migrate:dev   # Create/apply migration
 pnpm db:studio        # Prisma Studio
-pnpm types            # TypeScript prüfen
+pnpm types            # TypeScript check
 ```
 
-## Architektur
+## Architecture
 
 ### Monorepo
 
@@ -35,53 +35,53 @@ pnpm types            # TypeScript prüfen
 apps/page/           # Next.js App
 packages/
   database/          # Prisma Schema + Client (@repo/database)
-  eslint-config/     # Geteilte ESLint-Regeln
-  prettier-config/   # Geteilte Prettier-Config
-  typescript-config/ # Geteilte TypeScript-Config
+  eslint-config/     # Shared ESLint rules
+  prettier-config/   # Shared Prettier config
+  typescript-config/ # Shared TypeScript config
 ```
 
 ### App (apps/page/src/)
 
 - `app/` — Next.js App Router (Pages + API Routes)
-- `server/api/` — tRPC Router und Procedures
-- `server/auth.ts` — NextAuth-Konfiguration (Seibert OIDC)
-- `components/ui/` — UI-Komponenten (ESLint-ignored)
-- `trpc/` — Client-seitiges tRPC Setup mit React Query
-- `env.js` — Env-Var Validierung (t3-env/Zod)
+- `server/api/` — tRPC Router and Procedures
+- `server/auth.ts` — NextAuth configuration (Seibert OIDC)
+- `components/ui/` — UI components (ESLint-ignored)
+- `trpc/` — Client-side tRPC setup with React Query
+- `env.js` — Env var validation (t3-env/Zod)
 
 ### Patterns
 
-**Imports**: `~/` als Alias für `src/` (z.B. `import { db } from "~/server/db"`)
+**Imports**: `~/` as alias for `src/` (e.g. `import { db } from "~/server/db"`)
 
 **tRPC**:
-- `publicProcedure` — ohne Auth
-- `protectedProcedure` — mit Auth, wirft UNAUTHORIZED ohne Session
+- `publicProcedure` — no auth required
+- `protectedProcedure` — requires auth, throws UNAUTHORIZED without session
 
-**Neuen Router hinzufügen**:
-1. Router in `server/api/routers/` erstellen
-2. In `server/api/root.ts` exportieren
+**Adding a new router**:
+1. Create router in `server/api/routers/`
+2. Export in `server/api/root.ts`
 
-**Env-Vars**: Validiert beim Build via `src/env.js`. Neue Vars sowohl im Schema als auch in `runtimeEnv` eintragen.
+**Env vars**: Validated at build time via `src/env.js`. New vars must be added to both the schema and `runtimeEnv`.
 
 ### Stack
 
 - **Framework**: Next.js 16, React 19
 - **API**: tRPC 11 + React Query
 - **DB**: PostgreSQL + Prisma 7
-- **Auth**: NextAuth.js mit Seibert OIDC (@seibert.group)
+- **Auth**: NextAuth.js with Seibert OIDC (@seibert.group)
 - **Styling**: TailwindCSS 4, @seibert/react-ui
 - **Monorepo**: Turbo, pnpm Workspaces
 - **CI/CD**: GitHub Actions → Coolify (via `seibert-external/vibe-ci`)
 
-### Voraussetzungen
+### Prerequisites
 
 - Node.js ≥ 22.18.0
 - pnpm 10.15.1
 
 ## Deployment
 
-- **Hosting**: Coolify unter `https://coolify-dev.seibert.tools`
+- **Hosting**: Coolify at `https://coolify-dev.seibert.tools`
 - **CI**: GitHub Actions (`ci.yml`) — Lint, Build, Dedupe
 - **CD**: GitHub Actions (`deploy.yml`) → Coolify API → Docker Build
-- **Preview**: Pro PR eigener Container + eigene DB (automatisch via `entrypoint.sh` + `COOLIFY_BRANCH`)
+- **Preview**: Each PR gets its own container + own DB (automatically via `entrypoint.sh` + `COOLIFY_BRANCH`)
 - **Shared Workflow**: [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)

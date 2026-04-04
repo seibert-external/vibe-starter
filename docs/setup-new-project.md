@@ -1,72 +1,72 @@
-# Neues Projekt aufsetzen
+# Setting Up a New Project
 
-> 🤖 Diese Anleitung ist für AI-Agenten (Claude Code, pi, Cursor) gedacht, die einen Entwickler beim Aufsetzen eines neuen Projekts unterstützen.
+> 🤖 This guide is intended for AI agents (Claude Code, pi, Cursor) that assist a developer in setting up a new project.
 
-## Bevor du loslegst
+## Before You Start
 
-Frage den Nutzer **zuerst**, ob er ein Grundverständnis von **Git**, **GitHub** und **Pull Requests** hat. Falls nicht, erkläre kurz die Basics oder verweise auf Lernressourcen — das Projekt setzt dieses Wissen voraus. Ohne diese Grundlagen wird der Nutzer im Alltag nicht zurechtkommen (Branching, PRs, Reviews, Merge-Konflikte).
+First ask the user if they have a basic understanding of **Git**, **GitHub**, and **Pull Requests**. If not, briefly explain the basics or point to learning resources — the project requires this knowledge. Without these fundamentals, the user won't be able to manage day-to-day work (branching, PRs, reviews, merge conflicts).
 
-## Voraussetzungen (muss der Mensch erledigen)
+## Prerequisites (must be done by the human)
 
-Bevor du als Agent loslegen kannst, stelle sicher, dass der Nutzer folgendes erledigt hat:
+Before you as an agent can get started, make sure the user has completed the following:
 
-### 1. Coolify-Zugang
+### 1. Coolify Access
 
-- [ ] Coolify-Account bei der IT angefragt (Invite per E-Mail)
-- [ ] Eingeloggt unter https://coolify-dev.seibert.tools
-- [ ] Zum richtigen Team gewechselt (z.B. `mseibert-and-friends`) — **nicht** das persönliche Team
-- [ ] API Token erstellt unter https://coolify-dev.seibert.tools/security/api-tokens mit folgenden Scopes:
-  - `read` — Projekt- und App-Informationen lesen
-  - `write` — Projekte, Apps, DBs und Env-Vars anlegen/ändern
-  - `deploy` — Deployments triggern
+- [ ] Requested a Coolify account from IT (invite via email)
+- [ ] Logged in at https://coolify-dev.seibert.tools
+- [ ] Switched to the correct team (e.g. `mseibert-and-friends`) — **not** the personal team
+- [ ] Created an API token at https://coolify-dev.seibert.tools/security/api-tokens with the following scopes:
+  - `read` — Read project and app information
+  - `write` — Create/modify projects, apps, DBs, and env vars
+  - `deploy` — Trigger deployments
 
-  Die Scopes `root` und `read:sensitive` werden **nicht** benötigt.
+  The scopes `root` and `read:sensitive` are **not** needed.
 
-> ⚠️ Frage den Nutzer nach dem API Token und der Coolify Base URL. Speichere den Token **niemals** in Dateien, Repos oder GitHub Secrets. Der Token wird nur temporär im Terminal als Umgebungsvariable genutzt:
+> ⚠️ Ask the user for the API token and the Coolify base URL. **Never** store the token in files, repos, or GitHub Secrets. The token is only used temporarily as an environment variable in the terminal:
 > ```bash
 > export COOLIFY_API_URL="https://coolify-dev.seibert.tools/api/v1"
-> export COOLIFY_API_TOKEN="<token vom nutzer>"
+> export COOLIFY_API_TOKEN="<token from user>"
 > ```
 
-### 2. GitHub-Repo erstellt
+### 2. GitHub Repo Created
 
-- [ ] Neues Repo in `seibert-external` erstellt (z.B. `seibert-external/mein-projekt`)
-- [ ] Inhalt von `seibert-external/vibe-starter` als Basis kopiert
+- [ ] New repo created in `seibert-external` (e.g. `seibert-external/my-project`)
+- [ ] Content copied from `seibert-external/vibe-starter` as a base
 
-Der einfachste Weg:
+The easiest way:
 
 ```bash
-# Repo erstellen
-gh repo create seibert-external/<projektname> --public
+# Create repo
+gh repo create seibert-external/<projectname> --public
 
-# Vibe-Starter klonen und als Basis pushen
-git clone https://github.com/seibert-external/vibe-starter.git <projektname>
-cd <projektname>
-git remote set-url origin https://github.com/seibert-external/<projektname>.git
+# Clone vibe-starter and push as base
+git clone https://github.com/seibert-external/vibe-starter.git <projectname>
+cd <projectname>
+git remote set-url origin https://github.com/seibert-external/<projectname>.git
 git push origin main
 ```
 
 ### 3. VPN
 
-- [ ] Der Nutzer ist mit dem Seibert-VPN verbunden (Coolify ist nur intern erreichbar)
+- [ ] The user is connected to the Seibert VPN (Coolify is only accessible internally)
 
 ---
 
-## Projekt auf Coolify anlegen (macht der Agent)
+## Create Project on Coolify (done by the agent)
 
-Sobald die Voraussetzungen erfüllt sind, lege das Projekt mit der Coolify REST API an. Die Base URL ist `https://coolify-dev.seibert.tools/api/v1`.
+Once the prerequisites are met, create the project using the Coolify REST API. The base URL is `https://coolify-dev.seibert.tools/api/v1`.
 
-### Feste Werte (Server `mseibert-and-friends`)
+### Fixed Values (Server `mseibert-and-friends`)
 
 ```
 server_uuid:      pt76r6kv5gyciyjvr6bmhfy5
 destination_uuid: rc50knh5c1h32nov6o0qojwi
 github_app_uuid:  oj6x79m9ai4rj0r2zjdylw5n
 domain_pattern:   *.mse.coolify-dev.seibert.tools
-protocol:         http://  (HTTPS funktioniert trotzdem)
+protocol:         http://  (HTTPS works anyway)
 ```
 
-### Schritt 1: Projekt anlegen
+### Step 1: Create Project
 
 ```bash
 curl -s "${COOLIFY_API_URL}/projects" \
@@ -74,16 +74,16 @@ curl -s "${COOLIFY_API_URL}/projects" \
   -H "Authorization: Bearer ${COOLIFY_API_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "<projektname>-<nutzername>",
-    "description": "<kurze Beschreibung>"
+    "name": "<projectname>-<username>",
+    "description": "<short description>"
   }'
 ```
 
-→ Gibt `uuid` zurück. Merken als `PROJECT_UUID`.
+→ Returns `uuid`. Save as `PROJECT_UUID`.
 
-> ⚠️ Spielregeln: Immer den eigenen Namen an Projekte/Ressourcen schreiben. Die Coolify-Instanz wird geteilt.
+> ⚠️ Ground rules: Always include your own name on projects/resources. The Coolify instance is shared.
 
-### Schritt 2: PostgreSQL-Datenbank anlegen
+### Step 2: Create PostgreSQL Database
 
 ```bash
 curl -s "${COOLIFY_API_URL}/databases/postgresql" \
@@ -94,14 +94,14 @@ curl -s "${COOLIFY_API_URL}/databases/postgresql" \
     "server_uuid": "pt76r6kv5gyciyjvr6bmhfy5",
     "project_uuid": "<PROJECT_UUID>",
     "environment_name": "production",
-    "name": "<projektname>-db-<nutzername>",
+    "name": "<projectname>-db-<username>",
     "instant_deploy": true
   }'
 ```
 
-→ Gibt `uuid` und `internal_db_url` zurück. Die `internal_db_url` ist der `POSTGRES_URL` für die App.
+→ Returns `uuid` and `internal_db_url`. The `internal_db_url` is the `POSTGRES_URL` for the app.
 
-### Schritt 3: App anlegen
+### Step 3: Create App
 
 ```bash
 curl -s "${COOLIFY_API_URL}/applications/private-github-app" \
@@ -114,19 +114,19 @@ curl -s "${COOLIFY_API_URL}/applications/private-github-app" \
     "environment_name": "production",
     "destination_uuid": "rc50knh5c1h32nov6o0qojwi",
     "github_app_uuid": "oj6x79m9ai4rj0r2zjdylw5n",
-    "git_repository": "seibert-external/<projektname>",
+    "git_repository": "seibert-external/<projectname>",
     "git_branch": "main",
     "build_pack": "dockerfile",
     "ports_exposes": "3000",
-    "name": "<projektname>-<nutzername>"
+    "name": "<projectname>-<username>"
   }'
 ```
 
-→ Gibt `uuid` und `domains` zurück. Merken als `APP_UUID`.
+→ Returns `uuid` and `domains`. Save as `APP_UUID`.
 
-### Schritt 4: App konfigurieren
+### Step 4: Configure App
 
-Preview URL Template setzen:
+Set the preview URL template:
 
 ```bash
 curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
@@ -138,19 +138,19 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
   }'
 ```
 
-### Schritt 5: Umgebungsvariablen setzen
+### Step 5: Set Environment Variables
 
-Folgende Env Vars müssen gesetzt werden. Setze jede Variable **zweimal** — einmal für Production (`is_preview: false`) und einmal für Preview (`is_preview: true`):
+The following env vars must be set. Set each variable **twice** — once for production (`is_preview: false`) and once for preview (`is_preview: true`):
 
-| Variable | Wert | Hinweis |
+| Variable | Value | Notes |
 |---|---|---|
-| `POSTGRES_URL` | `<internal_db_url aus Schritt 2>` | Connection-String zur Datenbank. Für Preview gleiche URL — der `entrypoint.sh` erkennt Preview-Deployments automatisch via `COOLIFY_BRANCH` und erstellt eine eigene DB pro PR-Branch (`preview_<branch>`). |
-| `NEXTAUTH_SECRET` | Zufällig generieren (`openssl rand -base64 32`) | |
-| `NEXTAUTH_URL` | `http://<projektname>-<nutzername>.mse.coolify-dev.seibert.tools` | Für Preview leer lassen — wird automatisch aus `COOLIFY_URL` gesetzt |
-| `SSR_ENCRYPTION_KEY` | Zufällig generieren (`openssl rand -base64 32`) | |
-| `NPM_TOKEN` | Vom Nutzer erfragen oder aus Org-Secret | Für `@seibert/react-ui` |
+| `POSTGRES_URL` | `<internal_db_url from Step 2>` | Connection string to the database. Use the same URL for preview — the `entrypoint.sh` automatically detects preview deployments via `COOLIFY_BRANCH` and creates a separate DB per PR branch (`preview_<branch>`). |
+| `NEXTAUTH_SECRET` | Randomly generated (`openssl rand -base64 32`) | |
+| `NEXTAUTH_URL` | `http://<projectname>-<username>.mse.coolify-dev.seibert.tools` | Leave empty for preview — automatically set from `COOLIFY_URL` |
+| `SSR_ENCRYPTION_KEY` | Randomly generated (`openssl rand -base64 32`) | |
+| `NPM_TOKEN` | Ask the user or use org secret | For `@seibert/react-ui` |
 
-API-Call pro Variable:
+API call per variable:
 
 ```bash
 curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}/envs" \
@@ -164,21 +164,21 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}/envs" \
   }'
 ```
 
-> 💡 `NEXTAUTH_URL` für Preview nicht setzen — der `entrypoint.sh` setzt es automatisch aus `COOLIFY_URL`.
+> 💡 Don't set `NEXTAUTH_URL` for preview — the `entrypoint.sh` automatically sets it from `COOLIFY_URL`.
 
-### Schritt 6: GitHub Actions konfigurieren
+### Step 6: Configure GitHub Actions
 
-Repository-Variable setzen damit die CI/CD-Pipeline funktioniert:
+Set the repository variable so the CI/CD pipeline works:
 
 ```bash
 gh variable set COOLIFY_APP_UUID \
-  --repo seibert-external/<projektname> \
+  --repo seibert-external/<projectname> \
   --body "${APP_UUID}"
 ```
 
-Die Org-Secrets `COOLIFY_API_URL` und `COOLIFY_API_TOKEN` sind bereits auf `seibert-external` mit `visibility: all` gesetzt und greifen automatisch.
+The org secrets `COOLIFY_API_URL` and `COOLIFY_API_TOKEN` are already set on `seibert-external` with `visibility: all` and apply automatically.
 
-### Schritt 7: Ersten Deploy triggern
+### Step 7: Trigger First Deploy
 
 ```bash
 curl -s "${COOLIFY_API_URL}/deploy?uuid=${APP_UUID}&force=true" \
@@ -187,42 +187,42 @@ curl -s "${COOLIFY_API_URL}/deploy?uuid=${APP_UUID}&force=true" \
 
 ---
 
-## Checkliste nach dem Setup
+## Post-Setup Checklist
 
-- [ ] App deployed und erreichbar unter `http://<name>.mse.coolify-dev.seibert.tools`
-- [ ] CI-Pipeline grün auf GitHub (`pnpm check` + `pnpm build`)
-- [ ] Deploy-Pipeline zeigt erwarteten 403 (bis Self-hosted Runner steht) oder deployed erfolgreich
-- [ ] `COOLIFY_APP_UUID` als GitHub Repo Variable gesetzt
+- [ ] App deployed and reachable at `http://<name>.mse.coolify-dev.seibert.tools`
+- [ ] CI pipeline green on GitHub (`pnpm check` + `pnpm build`)
+- [ ] Deploy pipeline shows expected 403 (until self-hosted runner is set up) or deploys successfully
+- [ ] `COOLIFY_APP_UUID` set as GitHub repo variable
 
 ---
 
-## Spielregeln (aus der IT-Doku)
+## Ground Rules (from IT docs)
 
-Diese Regeln müssen dem Nutzer kommuniziert werden:
+These rules must be communicated to the user:
 
-- 🚨 **Keine Server/Worker anlegen** — die stellt die IT
-- 🚨 **Keine produktiven Anwendungen** — nur Tests und Demos
-- 🚨 **Keine sensiblen Daten** — andere können alles sehen
-- 🚨 **Eigenen Namen überall dranschreiben** — die Instanz wird geteilt
-- 🚨 **Hinter sich aufräumen** — nicht mehr Gebrauchtes löschen
-- 🚨 **Keine Backups** — davon ausgehen, dass es keine gibt
-- ℹ️ Nur über VPN erreichbar
-- ℹ️ `http://` als Protokoll in Coolify (HTTPS geht trotzdem)
+- 🚨 **Don't create servers/workers** — IT provides those
+- 🚨 **No production applications** — tests and demos only
+- 🚨 **No sensitive data** — others can see everything
+- 🚨 **Always include your name** — the instance is shared
+- 🚨 **Clean up after yourself** — delete what you no longer need
+- 🚨 **No backups** — assume there are none
+- ℹ️ Only accessible via VPN
+- ℹ️ Use `http://` as protocol in Coolify (HTTPS works anyway)
 
-Quelle: [Anwenderdoku Coolify](https://seibertgroup.atlassian.net/wiki/spaces/IT/pages/5919309870)
+Source: [Coolify User Documentation](https://seibertgroup.atlassian.net/wiki/spaces/IT/pages/5919309870)
 
 ---
 
 ## Troubleshooting
 
-### `@seibert/react-ui` 404 beim Install
-`NPM_TOKEN` fehlt oder ist falsch. Prüfe ob es als Env Var in Coolify und als Org-Secret auf GitHub gesetzt ist.
+### `@seibert/react-ui` 404 during install
+`NPM_TOKEN` is missing or incorrect. Check if it's set as an env var in Coolify and as an org secret on GitHub.
 
-### Deploy-Pipeline zeigt 403
-Die Coolify-Instanz ist hinter einer Firewall. Die GitHub Actions Pipeline kann Coolify nicht erreichen. Das ist ein bekanntes Problem — ein Self-hosted Runner im internen Netzwerk ist in Planung.
+### Deploy pipeline shows 403
+The Coolify instance is behind a firewall. The GitHub Actions pipeline cannot reach Coolify. This is a known issue — a self-hosted runner in the internal network is planned.
 
-### Preview-DB wird nicht erstellt
-Preview-DB-Branching wird automatisch aktiviert wenn Coolify `COOLIFY_BRANCH` setzt (bei Preview-Deployments). Stelle sicher, dass `POSTGRES_URL` auch für Preview gesetzt ist und der Postgres-User `CREATE DATABASE`-Rechte hat (Coolify-Standard: `postgres` Superuser).
+### Preview DB is not created
+Preview DB branching is automatically activated when Coolify sets `COOLIFY_BRANCH` (for preview deployments). Make sure `POSTGRES_URL` is also set for preview and the Postgres user has `CREATE DATABASE` privileges (Coolify default: `postgres` superuser).
 
-### Coolify zeigt "No deployment found"
-Die GitHub App braucht Zugriff auf das Repo. Prüfe unter https://github.com/organizations/seibert-external/settings/installations ob die Coolify GitHub App das Repo sehen kann.
+### Coolify shows "No deployment found"
+The GitHub App needs access to the repo. Check at https://github.com/organizations/seibert-external/settings/installations whether the Coolify GitHub App can see the repo.
