@@ -61,7 +61,7 @@ Once the prerequisites are met, create the project using the Coolify REST API. T
 ```
 server_uuid:      pt76r6kv5gyciyjvr6bmhfy5
 destination_uuid: rc50knh5c1h32nov6o0qojwi
-github_app_uuid:  oj6x79m9ai4rj0r2zjdylw5n
+github_app_uuid:  z9tl51h40ig1fmzzwa469l7m
 domain_pattern:   *.mse.coolify-dev.seibert.tools
 protocol:         http://  (HTTPS works anyway)
 ```
@@ -113,7 +113,7 @@ curl -s "${COOLIFY_API_URL}/applications/private-github-app" \
     "server_uuid": "pt76r6kv5gyciyjvr6bmhfy5",
     "environment_name": "production",
     "destination_uuid": "rc50knh5c1h32nov6o0qojwi",
-    "github_app_uuid": "oj6x79m9ai4rj0r2zjdylw5n",
+    "github_app_uuid": "z9tl51h40ig1fmzzwa469l7m",
     "git_repository": "seibert-external/<projectname>",
     "git_branch": "main",
     "build_pack": "dockerfile",
