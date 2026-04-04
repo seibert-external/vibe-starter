@@ -78,25 +78,6 @@ pnpm test:watch       # Watch mode (re-run on changes)
 pnpm test:coverage    # Run with coverage report
 ```
 
-## Environment Variables (dotenvx)
-
-Environment variables are managed with [dotenvx](https://dotenvx.com/). The `.env` file is **encrypted** and safe to commit. The decryption key lives in `.env.keys` (never committed).
-
-**First-time setup:**
-```bash
-cp .env.example .env          # Start from the example
-# Fill in your values, then encrypt:
-npx dotenvx encrypt           # Encrypts .env in-place
-```
-
-**Adding a new env var:**
-1. Add the var to `.env.example` (plaintext placeholder)
-2. Add it to `apps/page/src/env.js` (Zod schema + runtimeEnv)
-3. Add it to `turbo.json` globalEnv (if needed at build time)
-4. Run `npx dotenvx encrypt` to re-encrypt
-
-**In CI/Coolify:** Set `DOTENV_PRIVATE_KEY` as a secret. dotenvx decrypts automatically at runtime.
-
 ## Useful Commands
 
 ```bash
