@@ -1,97 +1,80 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Dieses Repo ist ein **Starter-Template**. Es wird geforkt um neue Web-Applikationen bei Seibert zu starten. Nicht direkt in diesem Repo entwickeln — erst forken, dann bauen.
 
-## Project Overview
+## Neues Projekt aufsetzen
 
-TypeScript monorepo using Turbo with pnpm workspaces. Main app is a Next.js 16 dashboard with tRPC API, Prisma/PostgreSQL database, and Seibert OIDC authentication.
+Wenn ein Nutzer ein neues Projekt starten will, folge **[docs/setup-new-project.md](docs/setup-new-project.md)**. Dort steht alles: Voraussetzungen, API-Calls, Env-Vars, Troubleshooting.
+
+Kurzversion: Der Nutzer braucht vorab einen **Coolify API Token** und ein **Repo in `seibert-external`** (kopiert von diesem Starter). Dann legst du als Agent via Coolify API ein Projekt, eine PostgreSQL-DB und eine App an.
 
 ## Commands
 
 ```bash
-# Development
-pnpm dev              # Start all apps (runs on port 3001)
-pnpm build            # Build all packages/apps
-
-# Code Quality
-pnpm lint             # ESLint (0 warnings required)
-pnpm lint:fix         # Auto-fix lint issues
-pnpm format           # Check Prettier formatting
-pnpm format:fix       # Auto-format
-pnpm fix              # Run both lint:fix and format:fix
-pnpm check            # CI verification (lint + format)
-
-# Database
-pnpm db:migrate:dev   # Create/apply migrations during development
-pnpm db:migrate:deploy # Deploy migrations to production
-pnpm db:studio        # Open Prisma Studio GUI
-
-# Type checking
-pnpm types            # TypeScript check (or run in apps/page)
+pnpm dev              # Dev-Server (Port 3001)
+pnpm build            # Alles bauen
+pnpm check            # CI lokal (Lint + Format)
+pnpm fix              # Auto-Fix (Lint + Format)
+pnpm db:migrate:dev   # Migration erstellen/anwenden
+pnpm db:studio        # Prisma Studio
+pnpm types            # TypeScript prüfen
 ```
 
-## Architecture
+## Architektur
 
-### Monorepo Structure
+### Monorepo
 
 ```
-apps/page/           # Next.js application
+apps/page/           # Next.js App
 packages/
-  database/          # Prisma client + schema (@repo/database)
-  eslint-config/     # Shared ESLint rules (@repo/eslint-config)
-  prettier-config/   # Shared Prettier config (@repo/prettier-config)
-  typescript-config/ # Shared tsconfig (@repo/typescript-config)
+  database/          # Prisma Schema + Client (@repo/database)
+  eslint-config/     # Geteilte ESLint-Regeln
+  prettier-config/   # Geteilte Prettier-Config
+  typescript-config/ # Geteilte TypeScript-Config
 ```
 
-### App Structure (apps/page/src/)
+### App (apps/page/src/)
 
-- `app/` - Next.js App Router pages and API routes
-- `server/api/` - tRPC routers and procedures
-- `server/auth.ts` - NextAuth configuration
-- `components/ui/` - shadcn/ui components (ESLint-ignored)
-- `trpc/` - Client-side tRPC setup with React Query
-- `env.js` - Environment validation with t3-env/Zod
+- `app/` — Next.js App Router (Pages + API Routes)
+- `server/api/` — tRPC Router und Procedures
+- `server/auth.ts` — NextAuth-Konfiguration (Seibert OIDC)
+- `components/ui/` — UI-Komponenten (ESLint-ignored)
+- `trpc/` — Client-seitiges tRPC Setup mit React Query
+- `env.js` — Env-Var Validierung (t3-env/Zod)
 
-### Key Patterns
+### Patterns
 
-**Path aliases**: Use `~/` for imports from `src/` (e.g., `import { db } from "~/server/db"`)
+**Imports**: `~/` als Alias für `src/` (z.B. `import { db } from "~/server/db"`)
 
-**tRPC procedures**:
-- `publicProcedure` - Unauthenticated endpoints
-- `protectedProcedure` - Requires session, throws UNAUTHORIZED if not logged in
+**tRPC**:
+- `publicProcedure` — ohne Auth
+- `protectedProcedure` — mit Auth, wirft UNAUTHORIZED ohne Session
 
-**Adding a new tRPC router**:
-1. Create router in `server/api/routers/`
-2. Export from `server/api/root.ts`
+**Neuen Router hinzufügen**:
+1. Router in `server/api/routers/` erstellen
+2. In `server/api/root.ts` exportieren
 
-**Environment variables**: Validated at build time via `src/env.js`. Add new variables to both the schema and `runtimeEnv`.
+**Env-Vars**: Validiert beim Build via `src/env.js`. Neue Vars sowohl im Schema als auch in `runtimeEnv` eintragen.
 
-### Tech Stack
+### Stack
 
 - **Framework**: Next.js 16, React 19
-- **API**: tRPC 11 with React Query
-- **Database**: PostgreSQL + Prisma 7
-- **Auth**: NextAuth.js with Seibert OIDC, domain-restricted (@seibert.group)
-- **Styling**: TailwindCSS 4, shadcn/ui components
-- **Monorepo**: Turbo, pnpm workspaces
+- **API**: tRPC 11 + React Query
+- **DB**: PostgreSQL + Prisma 7
+- **Auth**: NextAuth.js mit Seibert OIDC (@seibert.group)
+- **Styling**: TailwindCSS 4, @seibert/react-ui
+- **Monorepo**: Turbo, pnpm Workspaces
+- **CI/CD**: GitHub Actions → Coolify (via `seibert-external/vibe-ci`)
 
-### Requirements
+### Voraussetzungen
 
-- Node.js >= 22.18.0
+- Node.js ≥ 22.18.0
 - pnpm 10.15.1
 
-## Deployment & CI/CD
+## Deployment
 
-- **Hosting**: Coolify (self-hosted PaaS) unter `https://coolify-dev.seibert.tools`
-- **CI**: GitHub Actions (`ci.yml`) — Lint, Build, Dedupe Check
-- **CD**: GitHub Actions (`deploy.yml`) → triggert Coolify API → Docker Build auf Coolify
-- **Shared Workflows**: `seibert-external/vibe-ci` — reusable Coolify Deploy Workflow
-- **Preview Deployments**: Pro PR wird ein Preview-Container mit eigener DB deployed
-
-### Neues Projekt aufsetzen
-
-Wenn ein Nutzer ein neues Projekt basierend auf diesem Starter anlegen will, folge der Anleitung in **[docs/setup-new-project.md](docs/setup-new-project.md)**. Der Nutzer muss vorher:
-
-1. Einen **Coolify-Account + API Token** haben
-2. Ein **Repo in `seibert-external`** erstellt haben (kopiert von diesem Starter)
-3. Mit dem **Seibert-VPN** verbunden sein
+- **Hosting**: Coolify unter `https://coolify-dev.seibert.tools`
+- **CI**: GitHub Actions (`ci.yml`) — Lint, Build, Dedupe
+- **CD**: GitHub Actions (`deploy.yml`) → Coolify API → Docker Build
+- **Preview**: Pro PR eigener Container + eigene DB (automatisch via `entrypoint.sh` + `COOLIFY_BRANCH`)
+- **Shared Workflow**: [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)

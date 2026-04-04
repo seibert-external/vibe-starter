@@ -1,105 +1,81 @@
 # Vibe Starter
 
-> ⚠️ **Work in Progress** — This will become the Vibe Coding Starter Project. Not ready for use yet.
+> ⚠️ **Work in Progress** — Noch nicht produktionsreif.
 
-An opinionated starter template based on [Create T3 App](https://create.t3.gg/), with updated deps.
+Starter-Template für Web-Applikationen bei Seibert. Forke dieses Repo als Ausgangspunkt für neue Projekte.
 
-## What's Different
+## Wie nutze ich das?
 
-- **Prisma 7** with the new `pg` adapter
-- **React Query 5** (TanStack Query, new queryOptions API)
-- **Google OAuth** pre-configured with domain restriction
-- **shadcn/ui** components with Base UI/Radix primitives
-- **TailwindCSS 4** with PostCSS
-- **Turbo monorepo** structure with shared configs
-- **CI/CD pipelines** — GitHub Actions for CI, Coolify for deployments with preview environments
+1. **Repo forken** — Erstelle eine Kopie in `seibert-external` für dein Projekt
+2. **Coolify einrichten** — Projekt + Datenbank + App auf Coolify anlegen
+3. **Loslegen** — Baue deine App, CI/CD läuft automatisch
 
-## Stack
+> 🤖 Du brauchst das nicht alleine machen. Öffne das Repo in Claude Code, Cursor oder pi und sag: *"Ich will ein neues Projekt aufsetzen."* Der AI-Agent kennt die Anleitung in [`docs/setup-new-project.md`](docs/setup-new-project.md) und führt dich durch.
 
-- Next.js 16 + React 19
-- tRPC 11
-- PostgreSQL + Prisma
-- NextAuth.js
-- TypeScript 5.9
+### Voraussetzungen
 
-## Getting Started
+- **Coolify-Account** — Bei der IT anfragen ([Anwenderdoku](https://seibertgroup.atlassian.net/wiki/spaces/IT/pages/5919309870))
+- **Coolify API Token** — Unter https://coolify-dev.seibert.tools/security/api-tokens erstellen
+- **Seibert-VPN** — Coolify ist nur intern erreichbar
+- **Node.js ≥ 22.18**, **pnpm 10.15**
+
+## Tech Stack
+
+| Was | Womit |
+|---|---|
+| Framework | Next.js 16, React 19 |
+| API | tRPC 11 + React Query |
+| Datenbank | PostgreSQL + Prisma 7 |
+| Auth | NextAuth.js mit Seibert OIDC |
+| Styling | TailwindCSS 4, @seibert/react-ui |
+| CI/CD | GitHub Actions → Coolify |
+| Monorepo | Turbo + pnpm Workspaces |
+
+## Lokale Entwicklung
 
 ```bash
-# Install dependencies
 pnpm install
-
-# Set up environment
-cp .env.example .env
-# Fill in POSTGRES_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, etc.
-
-# Run database migrations
-pnpm db:migrate:dev
-
-# Start development server
-pnpm dev
+cp .env.example .env    # Env-Vars ausfüllen
+pnpm db:migrate:dev     # Datenbank-Migrationen
+pnpm dev                # http://localhost:3001
 ```
 
-The app runs at [http://localhost:3001](http://localhost:3001).
-
-## Project Structure
+## Projektstruktur
 
 ```
-apps/page/           # Next.js application
+apps/page/              # Next.js App
 packages/
-  database/          # Prisma schema and client
-  eslint-config/     # Shared ESLint config
-  prettier-config/   # Shared Prettier config
-  typescript-config/ # Shared TypeScript config
-.github/workflows/   # CI/CD pipelines
+  database/             # Prisma Schema + Client
+  eslint-config/        # Geteilte ESLint-Regeln
+  prettier-config/      # Geteilte Prettier-Config
+  typescript-config/    # Geteilte TypeScript-Config
+docs/
+  setup-new-project.md  # Anleitung: Neues Projekt aufsetzen
+.github/workflows/
+  ci.yml                # Lint, Build, Dedupe-Check
+  deploy.yml            # Coolify Deploy (nutzt seibert-external/vibe-ci)
 ```
 
 ## CI/CD
 
-Deployments are built and deployed via [Coolify](https://coolify.io/) (self-hosted). The GitHub Actions pipeline triggers Coolify's API — Coolify handles Docker builds, container orchestration, and routing. Preview environments get isolated databases per branch.
-
-### Workflows
-
-| Workflow | Trigger | What it does |
-|---|---|---|
-| **CI** (`ci.yml`) | Push to `main`, PRs | Lint/format validation, build check, lockfile dedupe check |
-| **Deploy** (`deploy.yml`) | Push to `main`, PRs | Triggers Coolify deployment, polls status, comments preview URL |
-| **Claude Code** (`claude.yml`) | `@claude` mentions, PR open | AI-assisted PR review and issue responses |
-| **Renovate Approve** (`renovate-approve.yml`) | PRs from Renovate | Auto-approves dependency update PRs |
-| **Close Stale Issues** (`close-stale-issues.yml`) | Hourly schedule | Closes issues labeled `awaiting-response` after 7 days |
-| **Close Stale PRs** (`close-stale-prs.yml`) | Hourly schedule | Closes inactive non-Renovate PRs after 7 days |
-| **Awaiting Response** (`awaiting-response.yml`) | Issue label/comment | Nudges on label add, clears label when author replies |
-
-### Deploy Flow
-
 ```
-Push to main ──→ Trigger Coolify deploy ──→ Docker build ──→ Prisma migrate ──→ Production
-Open PR ────────→ Trigger Coolify preview ──→ Docker build ──→ Create branch DB ──→ Prisma migrate ──→ Preview
-Close PR ───────→ Cleanup preview database (TODO)
+Push auf main ──→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Production
+PR öffnen ──────→ GitHub Actions ──→ Coolify API ──→ Docker Build ──→ Preview (eigene DB)
 ```
 
-PRs get a bot comment with the preview URL (dynamically resolved from the Coolify API), updated on each push. The preview URL follows the pattern configured in Coolify's `preview_url_template`.
+- **CI** prüft Lint, Formatting, Build bei jedem Push/PR
+- **Deploy** triggert Coolify — Coolify baut das Docker Image und deployed
+- **Preview** bekommt pro PR eine eigene Datenbank (automatisch via `entrypoint.sh`)
+- Shared Workflow liegt in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
 
-The Docker entrypoint (`entrypoint.sh`) handles preview database isolation: when `POSTGRES_ADMIN_URL` is set, it creates a branch-specific database (`starter_<branch_slug>`) and runs migrations against it.
+## Nützliche Befehle
 
-### Setup
-
-#### 1. Coolify
-
-Create an application in Coolify pointing to your GitHub repo. Coolify handles Docker builds using the repo's `Dockerfile`. Make sure:
-
-- **Build pack** is set to `dockerfile`
-- **Preview deployments** are enabled with desired URL template (default: `{{pr_id}}.{{domain}}`)
-- The app has `POSTGRES_ADMIN_URL` set as an environment variable (for preview DB creation)
-
-#### 2. GitHub Secrets
-
-Go to **Settings → Secrets and variables → Actions** and add these secrets:
-
-| Secret | Description |
-|---|---|
-| `COOLIFY_API_URL` | Coolify API base URL (e.g. `https://coolify-dev.seibert.tools/api/v1`) |
-| `COOLIFY_API_TOKEN` | Coolify API token (create under Settings → API Tokens) |
-| `COOLIFY_APP_UUID` | UUID of the Coolify application (visible in app URL or API) |
-| `CLAUDE_CODE_OAUTH_TOKEN` | Anthropic Claude Code OAuth token (for AI workflows) |
-
-The pipeline is **fully portable** — no hardcoded URLs. The preview URL is dynamically resolved from the Coolify API at deploy time using the app's `fqdn` and `preview_url_template`.
+```bash
+pnpm dev              # Dev-Server starten
+pnpm build            # Alles bauen
+pnpm check            # CI lokal prüfen (Lint + Format)
+pnpm fix              # Auto-Fix (Lint + Format)
+pnpm db:migrate:dev   # Neue Migration erstellen
+pnpm db:studio        # Prisma Studio (DB-GUI)
+pnpm types            # TypeScript prüfen
+```
