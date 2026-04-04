@@ -79,3 +79,19 @@ packages/
 
 - Node.js >= 22.18.0
 - pnpm 10.15.1
+
+## Deployment & CI/CD
+
+- **Hosting**: Coolify (self-hosted PaaS) unter `https://coolify-dev.seibert.tools`
+- **CI**: GitHub Actions (`ci.yml`) — Lint, Build, Dedupe Check
+- **CD**: GitHub Actions (`deploy.yml`) → triggert Coolify API → Docker Build auf Coolify
+- **Shared Workflows**: `seibert-external/vibe-ci` — reusable Coolify Deploy Workflow
+- **Preview Deployments**: Pro PR wird ein Preview-Container mit eigener DB deployed
+
+### Neues Projekt aufsetzen
+
+Wenn ein Nutzer ein neues Projekt basierend auf diesem Starter anlegen will, folge der Anleitung in **[docs/setup-new-project.md](docs/setup-new-project.md)**. Der Nutzer muss vorher:
+
+1. Einen **Coolify-Account + API Token** haben
+2. Ein **Repo in `seibert-external`** erstellt haben (kopiert von diesem Starter)
+3. Mit dem **Seibert-VPN** verbunden sein
