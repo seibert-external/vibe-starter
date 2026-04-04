@@ -182,10 +182,14 @@ The org secrets `COOLIFY_API_URL` and `COOLIFY_API_TOKEN` are already set on `se
 
 ### Step 7: Trigger First Deploy
 
+Coolify auto-deploys on push via the GitHub App webhook. To trigger the first deploy manually (before any push):
+
 ```bash
 curl -s "${COOLIFY_API_URL}/deploy?uuid=${APP_UUID}&force=true" \
   -H "Authorization: Bearer ${COOLIFY_API_TOKEN}"
 ```
+
+> 💡 After the first deploy, all subsequent deployments are triggered automatically by the Coolify GitHub App webhook — both for production (push to main) and preview (pull requests).
 
 ---
 
