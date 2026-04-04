@@ -126,7 +126,7 @@ curl -s "${COOLIFY_API_URL}/applications/private-github-app" \
 
 ### Step 4: Configure App
 
-Set the preview URL template:
+Set the preview URL template and enable preview deployments:
 
 ```bash
 curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
@@ -137,6 +137,8 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
     "preview_url_template": "{{pr_id}}.{{domain}}"
   }'
 ```
+
+> ⚠️ **Important:** Preview Deployments must be enabled in the Coolify UI. Go to the application → Settings → Preview Deployments → enable the checkbox and click **Save**. This cannot currently be set via API. Without this, PR preview deployments won't work — Coolify's GitHub App webhook triggers preview builds only when this setting is active.
 
 ### Step 5: Set Environment Variables
 
@@ -226,3 +228,9 @@ Preview DB branching is automatically activated when Coolify sets `COOLIFY_BRANC
 
 ### Coolify shows "No deployment found"
 The GitHub App needs access to the repo. Check at https://github.com/organizations/seibert-external/settings/installations whether the Coolify GitHub App can see the repo.
+
+### Preview deployment not triggered / PR comment shows "Webhook deployment not found"
+Preview deployments are triggered by the Coolify GitHub App webhook, **not** by the CI workflow. Check:
+1. **Preview Deployments enabled** in Coolify UI (application → Settings → Preview Deployments)
+2. **GitHub App** has access to the repo (check installations at GitHub org settings)
+3. **Webhook delivery** is working (check GitHub App → Advanced → Recent Deliveries)

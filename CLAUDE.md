@@ -82,6 +82,7 @@ packages/
 
 - **Hosting**: Coolify at `https://coolify-dev.seibert.tools`
 - **CI**: GitHub Actions (`ci.yml`) — Lint, Build, Dedupe
-- **CD**: GitHub Actions (`deploy.yml`) → Coolify API → Docker Build
+- **CD (production)**: GitHub Actions (`deploy.yml`) → Coolify API → Docker Build
+- **CD (preview)**: Coolify GitHub App webhook auto-deploys on PR events; GitHub Actions only polls status + comments
 - **Preview**: Each PR gets its own container + own DB (automatically via `entrypoint.sh` + `COOLIFY_BRANCH`)
 - **Shared Workflow**: [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
