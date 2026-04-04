@@ -135,8 +135,7 @@ Folgende Env Vars müssen gesetzt werden. Setze jede Variable **zweimal** — ei
 
 | Variable | Wert | Hinweis |
 |---|---|---|
-| `POSTGRES_URL` | `<internal_db_url aus Schritt 2>` | Connection-String zur Datenbank |
-| `POSTGRES_ADMIN_URL` | `<internal_db_url aus Schritt 2>` | **Nur für Preview** (`is_preview: true`). Gleiche URL wie `POSTGRES_URL`. Dient als Feature-Flag: wenn gesetzt, erstellt der `entrypoint.sh` automatisch eine eigene DB pro PR-Branch (`preview_<branch>`) und überschreibt `POSTGRES_URL` darauf. Wenn nicht gesetzt, wird `POSTGRES_URL` direkt genutzt (Production-Modus). |
+| `POSTGRES_URL` | `<internal_db_url aus Schritt 2>` | Connection-String zur Datenbank. Für Preview gleiche URL — der `entrypoint.sh` erkennt Preview-Deployments automatisch via `COOLIFY_BRANCH` und erstellt eine eigene DB pro PR-Branch (`preview_<branch>`). |
 | `NEXTAUTH_SECRET` | Zufällig generieren (`openssl rand -base64 32`) | |
 | `NEXTAUTH_URL` | `http://<projektname>-<nutzername>.mse.coolify-dev.seibert.tools` | Für Preview leer lassen — wird automatisch aus `COOLIFY_URL` gesetzt |
 | `SSR_ENCRYPTION_KEY` | Zufällig generieren (`openssl rand -base64 32`) | |
@@ -155,8 +154,6 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}/envs" \
     "is_preview": false
   }'
 ```
-
-> 💡 `POSTGRES_ADMIN_URL` nur mit `is_preview: true` setzen. Production braucht das nicht.
 
 > 💡 `NEXTAUTH_URL` für Preview nicht setzen — der `entrypoint.sh` setzt es automatisch aus `COOLIFY_URL`.
 
@@ -216,7 +213,7 @@ Quelle: [Anwenderdoku Coolify](https://seibertgroup.atlassian.net/wiki/spaces/IT
 Die Coolify-Instanz ist hinter einer Firewall. Die GitHub Actions Pipeline kann Coolify nicht erreichen. Das ist ein bekanntes Problem — ein Self-hosted Runner im internen Netzwerk ist in Planung.
 
 ### Preview-DB wird nicht erstellt
-`POSTGRES_ADMIN_URL` muss als Preview-Env-Var gesetzt sein. Ohne diese Variable überspringt der `entrypoint.sh` das DB-Branching.
+Preview-DB-Branching wird automatisch aktiviert wenn Coolify `COOLIFY_BRANCH` setzt (bei Preview-Deployments). Stelle sicher, dass `POSTGRES_URL` auch für Preview gesetzt ist und der Postgres-User `CREATE DATABASE`-Rechte hat (Coolify-Standard: `postgres` Superuser).
 
 ### Coolify zeigt "No deployment found"
 Die GitHub App braucht Zugriff auf das Repo. Prüfe unter https://github.com/organizations/seibert-external/settings/installations ob die Coolify GitHub App das Repo sehen kann.

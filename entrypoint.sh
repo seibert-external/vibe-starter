@@ -2,21 +2,22 @@
 set -e
 
 # --- Preview deployment: create a branch-specific database ---
-if [ -n "$POSTGRES_ADMIN_URL" ]; then
-  BRANCH="${COOLIFY_BRANCH:-preview}"
+# Detected via COOLIFY_BRANCH which Coolify sets only for preview deployments.
+# Uses the same POSTGRES_URL for CREATE DATABASE (Coolify's default postgres user has superuser rights).
+if [ -n "$COOLIFY_BRANCH" ]; then
   # Sanitize branch name for use as a Postgres DB name
-  DB_NAME="preview_$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/__*/_/g' | sed 's/^_//;s/_$//')"
+  DB_NAME="preview_$(echo "$COOLIFY_BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/__*/_/g' | sed 's/^_//;s/_$//')"
 
-  echo "==> Preview deployment detected (branch: $BRANCH)"
+  echo "==> Preview deployment detected (branch: $COOLIFY_BRANCH)"
   echo "==> Ensuring database exists: $DB_NAME"
 
-  psql "$POSTGRES_ADMIN_URL" -tc \
+  psql "$POSTGRES_URL" -tc \
     "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" \
     | grep -q 1 \
-    || psql "$POSTGRES_ADMIN_URL" -c "CREATE DATABASE \"$DB_NAME\""
+    || psql "$POSTGRES_URL" -c "CREATE DATABASE \"$DB_NAME\""
 
   # Rewrite POSTGRES_URL to point at the branch database
-  BASE_URL="${POSTGRES_ADMIN_URL%/*}"
+  BASE_URL="${POSTGRES_URL%/*}"
   export POSTGRES_URL="${BASE_URL}/${DB_NAME}"
   echo "==> POSTGRES_URL set to branch database"
 
@@ -24,7 +25,7 @@ if [ -n "$POSTGRES_ADMIN_URL" ]; then
   # Drop preview_* databases that have no active connections (container gone)
   # Safety: only targets preview_* prefix, skips the current DB, skips DBs with connections
   echo "==> Checking for orphaned preview databases..."
-  STALE_DBS=$(psql "$POSTGRES_ADMIN_URL" -Atc "
+  STALE_DBS=$(psql "$POSTGRES_URL" -Atc "
     SELECT datname FROM pg_database
     WHERE datname LIKE 'preview_%'
       AND datname != '$DB_NAME'
@@ -36,7 +37,7 @@ if [ -n "$POSTGRES_ADMIN_URL" ]; then
 
   for db in $STALE_DBS; do
     echo "==> Dropping orphaned database: $db"
-    psql "$POSTGRES_ADMIN_URL" -c "DROP DATABASE \"$db\""
+    psql "$POSTGRES_URL" -c "DROP DATABASE \"$db\""
   done
 
   if [ -z "$STALE_DBS" ]; then
