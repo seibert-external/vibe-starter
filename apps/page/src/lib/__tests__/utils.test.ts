@@ -6,8 +6,8 @@ describe("cn", () => {
     expect(cn("foo", "bar")).toBe("foo bar");
   });
 
-  it("handles conditional classes", () => {
-    expect(cn("base", false && "hidden", "visible")).toBe("base visible");
+  it("handles undefined and null values", () => {
+    expect(cn("base", undefined, null, "visible")).toBe("base visible");
   });
 
   it("merges tailwind conflicts (last wins)", () => {
