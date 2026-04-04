@@ -30,20 +30,20 @@ Before you as an agent can get started, make sure the user has completed the fol
 
 ### 2. GitHub Repo Created
 
-- [ ] New repo created in `seibert-external` (e.g. `seibert-external/my-project`)
-- [ ] Content copied from `seibert-external/vibe-starter` as a base
+- [ ] New repo created from the template `seibert-external/vibe-starter`
 
-The easiest way:
+**Option A — GitHub UI (recommended):**
+1. Go to https://github.com/seibert-external/vibe-starter
+2. Click the green **"Use this template"** → **"Create a new repository"**
+3. Set owner to `seibert-external`, enter a repo name, and create
 
+**Option B — GitHub CLI:**
 ```bash
-# Create repo
-gh repo create seibert-external/<projectname> --public
-
-# Clone vibe-starter and push as base
-git clone https://github.com/seibert-external/vibe-starter.git <projectname>
+gh repo create seibert-external/<projectname> \
+  --template seibert-external/vibe-starter \
+  --public
+git clone https://github.com/seibert-external/<projectname>.git
 cd <projectname>
-git remote set-url origin https://github.com/seibert-external/<projectname>.git
-git push origin main
 ```
 
 ### 3. VPN

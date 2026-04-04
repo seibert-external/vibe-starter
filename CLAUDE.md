@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This repo is a **starter template**. It gets forked to start new web applications at Seibert. Don't develop directly in this repo — fork first, then build.
+This repo is a **GitHub template repository**. Use the green **"Use this template"** button on GitHub to create a new repo from it — this gives you a clean history with no fork link. Don't develop directly in this repo.
 
 ## Important Rules
 
@@ -13,7 +13,7 @@ This repo is a **starter template**. It gets forked to start new web application
 
 If a user wants to start a new project, follow **[docs/setup-new-project.md](docs/setup-new-project.md)**. Everything is documented there: prerequisites, API calls, env vars, troubleshooting.
 
-Short version: The user needs a **Coolify API Token** and a **repo in `seibert-external`** (copied from this starter) beforehand. Then you as an agent create a project, a PostgreSQL DB, and an app via the Coolify API.
+Short version: The user needs a **Coolify API Token** and a **repo in `seibert-external`** (created from this template via "Use this template") beforehand. Then you as an agent create a project, a PostgreSQL DB, and an app via the Coolify API.
 
 ## Commands
 
