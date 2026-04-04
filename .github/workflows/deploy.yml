@@ -3,6 +3,8 @@ name: Deploy
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -14,5 +16,6 @@ jobs:
       contents: read
     with:
       coolify_app_uuid: ${{ vars.COOLIFY_APP_UUID }}
-      commit_sha: ${{ github.sha }}
+      commit_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      pr_number: ${{ github.event.pull_request.number || 0 }}
     secrets: inherit
