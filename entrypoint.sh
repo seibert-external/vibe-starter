@@ -4,7 +4,7 @@ set -e
 # --- Preview deployment: create a branch-specific database ---
 # Detected via COOLIFY_BRANCH which Coolify sets only for preview deployments.
 # Uses the same POSTGRES_URL for CREATE DATABASE (Coolify's default postgres user has superuser rights).
-if [ -n "$COOLIFY_BRANCH" ]; then
+if [ -n "$COOLIFY_BRANCH" ] && [ "$COOLIFY_BRANCH" != "main" ]; then
   # Sanitize branch name for use as a Postgres DB name
   DB_NAME="preview_$(echo "$COOLIFY_BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/_/g' | sed 's/__*/_/g' | sed 's/^_//;s/_$//')"
 
