@@ -68,6 +68,35 @@ Open PR ────────→ GitHub Actions ──→ Coolify API ──�
 - **Preview** gets its own database per PR (automatically via `entrypoint.sh`)
 - Shared workflow lives in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
 
+## Testing
+
+This project uses **Test-Driven Development** with Vitest. Use the `/tdd` command in Claude Code for the full workflow.
+
+```bash
+pnpm test             # Run all tests
+pnpm test:watch       # Watch mode (re-run on changes)
+pnpm test:coverage    # Run with coverage report
+```
+
+## Environment Variables (dotenvx)
+
+Environment variables are managed with [dotenvx](https://dotenvx.com/). The `.env` file is **encrypted** and safe to commit. The decryption key lives in `.env.keys` (never committed).
+
+**First-time setup:**
+```bash
+cp .env.example .env          # Start from the example
+# Fill in your values, then encrypt:
+npx dotenvx encrypt           # Encrypts .env in-place
+```
+
+**Adding a new env var:**
+1. Add the var to `.env.example` (plaintext placeholder)
+2. Add it to `apps/page/src/env.js` (Zod schema + runtimeEnv)
+3. Add it to `turbo.json` globalEnv (if needed at build time)
+4. Run `npx dotenvx encrypt` to re-encrypt
+
+**In CI/Coolify:** Set `DOTENV_PRIVATE_KEY` as a secret. dotenvx decrypts automatically at runtime.
+
 ## Useful Commands
 
 ```bash
@@ -75,6 +104,7 @@ pnpm dev              # Start dev server
 pnpm build            # Build everything
 pnpm check            # Run CI locally (lint + format)
 pnpm fix              # Auto-fix (lint + format)
+pnpm test             # Run all tests
 pnpm db:migrate:dev   # Create new migration
 pnpm db:studio        # Prisma Studio (DB GUI)
 pnpm types            # TypeScript check
