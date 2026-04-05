@@ -14,7 +14,7 @@ This repo is a **GitHub template repository**. Use the green **"Use this templat
 When building features, document what the software does in the `docs/` folder using Markdown files. This helps others discover and understand the application.
 
 **What to document:**
-- What the software does and who it's for (in a `docs/README.md`)
+- What the software does and who it's for (in `README.md` or `docs/README.md`)
 - Each major feature or use case (one Markdown file per feature, e.g. `docs/feature-name.md`)
 - How to use the features from a user perspective
 
