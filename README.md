@@ -68,6 +68,37 @@ Open PR ────────→ GitHub Actions ──→ Coolify API ──�
 - **Preview** gets its own database per PR (automatically via `entrypoint.sh`)
 - Shared workflow lives in [`seibert-external/vibe-ci`](https://github.com/seibert-external/vibe-ci)
 
+## Slash Commands (Claude Code)
+
+This project includes slash commands for Claude Code that guide you through structured workflows. Just type the command in your Claude Code session.
+
+### Planning & Design
+
+Use these **before** writing code:
+
+| Command | What it does |
+|---------|-------------|
+| `/write-a-prd` | Define requirements for a new feature through an interactive interview |
+| `/prd-to-plan` | Break an existing PRD into implementation phases with vertical slices |
+| `/prd-to-issues` | Turn a PRD into actionable, independently-grabbable GitHub issues |
+| `/grill-me` | Stress-test your plan or design — gets grilled until all open questions are resolved |
+| `/design-an-interface` | Generate and compare multiple radically different API/module designs |
+| `/request-refactor-plan` | Plan a safe refactor with tiny incremental commits |
+
+### Development
+
+Use these **during** implementation:
+
+| Command | What it does |
+|---------|-------------|
+| `/tdd` | The default development workflow — write one test, implement, repeat |
+| `/triage-issue` | Investigate a bug, find the root cause, and create an issue with a fix plan |
+| `/improve-codebase-architecture` | Find architectural friction and opportunities for improvement |
+
+### Typical workflow
+
+For new features: `/write-a-prd` → `/prd-to-plan` or `/prd-to-issues` → `/tdd` for each slice.
+
 ## Testing
 
 This project uses **Test-Driven Development** with Vitest. Use the `/tdd` command in Claude Code for the full workflow.
