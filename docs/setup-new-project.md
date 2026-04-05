@@ -144,7 +144,7 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
 
 The following env vars must be set. Set each variable **twice** — once for production (`is_preview: false`) and once for preview (`is_preview: true`).
 
-> 💡 **Team Shared Variables:** Variables like `NPM_TOKEN`, `SEIBERT_CLIENT_ID`, and `SEIBERT_CLIENT_SECRET` are managed centrally as Team Shared Variables in Coolify. Reference them with `{{ team.VARIABLE_NAME }}` instead of hardcoding values. This way, when a token is rotated, all projects pick up the new value automatically.
+> 💡 **Team Shared Variables:** Variables like `NPM_TOKEN`, `SEIBERT_CLIENT_ID`, and `SEIBERT_CLIENT_SECRET` are managed centrally as Team Shared Variables in Coolify. Reference them with `{{ team.VARIABLE_NAME }}` instead of hardcoding values. This way, when a token is rotated, all projects pick up the new value automatically. **Important:** do **not** delete the project-level variable — team vars do not fall through automatically. Keep the variable and change its value to the `{{ team.X }}` reference.
 
 | Variable | Value | Build | Runtime | Notes |
 |---|---|---|---|---|
