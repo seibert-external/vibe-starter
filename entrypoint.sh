@@ -47,7 +47,7 @@ fi
 
 # --- Auto-set NEXTAUTH_URL from Coolify if not explicitly provided ---
 if [ -z "$NEXTAUTH_URL" ] && [ -n "$COOLIFY_URL" ]; then
-  export NEXTAUTH_URL="$COOLIFY_URL"
+  export NEXTAUTH_URL="$(echo "$COOLIFY_URL" | sed 's|^http://|https://|')"
   echo "==> NEXTAUTH_URL auto-set from COOLIFY_URL: $NEXTAUTH_URL"
 fi
 

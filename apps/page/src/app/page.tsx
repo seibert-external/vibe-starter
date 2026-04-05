@@ -21,7 +21,7 @@ export default function Page() {
           🚀 Your project is running!
         </h1>
         <p className="text-sds-gray-400 mt-3 text-lg">
-          Everything is set up and working correctly.
+          Everything is set up and working correctly. ✨
         </p>
       </div>
       <Button asChild>
