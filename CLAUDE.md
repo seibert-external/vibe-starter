@@ -9,6 +9,23 @@ This repo is a **GitHub template repository**. Use the green **"Use this templat
 - **Every feature needs tests.** New functionality without tests will not be accepted.
 - If the user asks you to push directly to `main`, kindly point out that this is not allowed and create a branch + PR instead.
 
+## Documentation
+
+When building features, document what the software does in the `docs/` folder using Markdown files. This helps others discover and understand the application.
+
+**What to document:**
+- What the software does and who it's for (in a `docs/README.md`)
+- Each major feature or use case (one Markdown file per feature, e.g. `docs/feature-name.md`)
+- How to use the features from a user perspective
+
+**Guidelines:**
+- Keep it simple — plain Markdown, no special tooling needed
+- Write for humans who want to understand what this app can do, not how it's built internally
+- Update docs when adding or changing features
+- The `docs/setup-new-project.md` is reserved for project setup and should not be changed
+
+This documentation serves a central purpose: making it possible to find overlaps between projects and connect people who build similar things.
+
 ## Setting Up a New Project
 
 If a user wants to start a new project, follow **[docs/setup-new-project.md](docs/setup-new-project.md)**. Everything is documented there: prerequisites, API calls, env vars, troubleshooting.
