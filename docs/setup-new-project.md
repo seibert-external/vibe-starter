@@ -142,15 +142,19 @@ curl -s "${COOLIFY_API_URL}/applications/${APP_UUID}" \
 
 ### Step 5: Set Environment Variables
 
-The following env vars must be set. Set each variable **twice** — once for production (`is_preview: false`) and once for preview (`is_preview: true`):
+The following env vars must be set. Set each variable **twice** — once for production (`is_preview: false`) and once for preview (`is_preview: true`).
 
-| Variable | Value | Notes |
-|---|---|---|
-| `POSTGRES_URL` | `<internal_db_url from Step 2>` | Connection string to the database. Use the same URL for preview — the `entrypoint.sh` automatically detects preview deployments via `COOLIFY_BRANCH` and creates a separate DB per PR branch (`preview_<branch>`). |
-| `NEXTAUTH_SECRET` | Randomly generated (`openssl rand -base64 32`) | |
-| `NEXTAUTH_URL` | `http://<projectname>-<username>.mse.coolify-dev.seibert.tools` | Leave empty for preview — automatically set from `COOLIFY_URL` |
-| `SSR_ENCRYPTION_KEY` | Randomly generated (`openssl rand -base64 32`) | |
-| `NPM_TOKEN` | Ask the user or use org secret | For `@seibert/react-ui` |
+> 💡 **Team Shared Variables:** Variables like `NPM_TOKEN`, `SEIBERT_CLIENT_ID`, and `SEIBERT_CLIENT_SECRET` are managed centrally as Team Shared Variables in Coolify. Reference them with `{{ team.VARIABLE_NAME }}` instead of hardcoding values. This way, when a token is rotated, all projects pick up the new value automatically.
+
+| Variable | Value | Build | Runtime | Notes |
+|---|---|---|---|---|
+| `POSTGRES_URL` | `<internal_db_url from Step 2>` | yes | yes | Connection string to the database. Use the same URL for preview — the `entrypoint.sh` automatically detects preview deployments via `COOLIFY_BRANCH` and creates a separate DB per PR branch (`preview_<branch>`). |
+| `NEXTAUTH_SECRET` | Randomly generated (`openssl rand -base64 32`) | yes | yes | |
+| `NEXTAUTH_URL` | `http://<projectname>-<username>.mse.coolify-dev.seibert.tools` | yes | yes | Leave empty for preview — automatically set from `COOLIFY_URL` |
+| `SSR_ENCRYPTION_KEY` | Randomly generated (`openssl rand -base64 32`) | yes | yes | |
+| `NPM_TOKEN` | `{{ team.NPM_TOKEN }}` | yes | no | References the Team Shared Variable. Needed at build time for `@seibert/react-ui`. |
+| `SEIBERT_CLIENT_ID` | `{{ team.SEIBERT_CLIENT_ID }}` | no | yes | OAuth Client ID for Seibert SSO login. References Team Shared Variable. |
+| `SEIBERT_CLIENT_SECRET` | `{{ team.SEIBERT_CLIENT_SECRET }}` | no | yes | OAuth Client Secret for Seibert SSO login. References Team Shared Variable. |
 
 API call per variable:
 
@@ -222,7 +226,7 @@ Source: [Coolify User Documentation](https://seibertgroup.atlassian.net/wiki/spa
 ## Troubleshooting
 
 ### `@seibert/react-ui` 404 during install
-`NPM_TOKEN` is missing or incorrect. Check if it's set as an env var in Coolify and as an org secret on GitHub.
+`NPM_TOKEN` is missing or incorrect. Check that it's set as a **build-time** env var in Coolify with value `{{ team.NPM_TOKEN }}`. The variable must reference the Team Shared Variable — do **not** delete it, replace the value instead. Also verify the Team Shared Variable `NPM_TOKEN` exists under Shared Variables in Coolify.
 
 ### Deploy pipeline shows 403
 The Coolify instance is behind a firewall. The GitHub Actions pipeline cannot reach Coolify. This is a known issue — a self-hosted runner in the internal network is planned.
